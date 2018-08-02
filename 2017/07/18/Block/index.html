@@ -1,0 +1,476 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>block | 周二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="取名很蛋疼">
+    
+
+    
+    <meta name="description" content="官方文档Block 的存储区域weak 与 strong 是如何解决循环引用的 block 的本质通过 clang -rewirite-objc main.m 命令，查看生成的 main.cpp 文件，可以看出：  编译器会将 block 的内部代码生成对应的函数，调用 block 时就是调用这个函数   block 的内存管理 默认情况下, block 是在栈内存中，不会对所引用的对象进行任何">
+<meta name="keywords" content="block">
+<meta property="og:type" content="article">
+<meta property="og:title" content="block">
+<meta property="og:url" content="https://cfap.github.io/2017/07/18/Block/index.html">
+<meta property="og:site_name" content="周二">
+<meta property="og:description" content="官方文档Block 的存储区域weak 与 strong 是如何解决循环引用的 block 的本质通过 clang -rewirite-objc main.m 命令，查看生成的 main.cpp 文件，可以看出：  编译器会将 block 的内部代码生成对应的函数，调用 block 时就是调用这个函数   block 的内存管理 默认情况下, block 是在栈内存中，不会对所引用的对象进行任何">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-06-28T10:55:18.978Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="block">
+<meta name="twitter:description" content="官方文档Block 的存储区域weak 与 strong 是如何解决循环引用的 block 的本质通过 clang -rewirite-objc main.m 命令，查看生成的 main.cpp 文件，可以看出：  编译器会将 block 的内部代码生成对应的函数，调用 block 时就是调用这个函数   block 的内存管理 默认情况下, block 是在栈内存中，不会对所引用的对象进行任何">
+
+    
+    <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.png">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="周二">周二</a></h1>
+				<h2 class="blog-motto">不做评论</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:cfap.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/07/18/Block/" title="block" itemprop="url">block</a>
+  </h1>
+  
+  <p class="article-time">
+    <time datetime="2017-07-18T08:14:13.000Z" itemprop="datePublished"> 发表于 2017-07-18 16:14:13</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		<p><br></p>
+<h3 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a><a href="https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/Blocks/Articles/00_Introduction.html#//apple_ref/doc/uid/TP40007502-CH1-SW1" target="_blank" rel="noopener"><strong>官方文档</strong></a></h3><h3 id="Block-的存储区域"><a href="#Block-的存储区域" class="headerlink" title="Block 的存储区域"></a><a href="https://www.jianshu.com/p/a11337dbc8fd" target="_blank" rel="noopener"><strong>Block 的存储区域</strong></a></h3><h3 id="weak-与-strong-是如何解决循环引用的"><a href="#weak-与-strong-是如何解决循环引用的" class="headerlink" title="weak 与 strong 是如何解决循环引用的"></a><a href="https://www.jianshu.com/p/89a63823f61a" target="_blank" rel="noopener"><strong><strong>weak 与 </strong>strong 是如何解决循环引用的</strong></a></h3><p><br></p>
+<h3 id="block-的本质"><a href="#block-的本质" class="headerlink" title="block 的本质"></a>block 的本质</h3><p>通过 <code>clang -rewirite-objc main.m</code> 命令，查看生成的 <code>main.cpp</code> 文件，可以看出：</p>
+<ul>
+<li>编译器会将 <code>block</code> 的内部代码生成对应的函数，调用 block 时就是调用这个函数</li>
+</ul>
+<p><br></p>
+<h3 id="block-的内存管理"><a href="#block-的内存管理" class="headerlink" title="block 的内存管理"></a>block 的内存管理</h3><ul>
+<li>默认情况下, <code>block</code> 是在栈内存中，不会对所引用的对象进行任何操作</li>
+<li>如果对 block 做一次 <code>copy</code>，或者 block 内部引用了外部变量，则 block 就会被拷贝到堆内存中  </li>
+</ul>
+<p><br></p>
+<h3 id="block-的使用"><a href="#block-的使用" class="headerlink" title="block 的使用"></a>block 的使用</h3><ul>
+<li>定义 block 类型属性时要用<code>copy</code>，这样才会把 block 放在堆内存中管理</li>
+<li>block 内部不能修改外部没有用<code>__block</code>修饰的对象，但可以修改这个对象的属性</li>
+<li>用<code>__block</code>修饰变量，则该变量可以在 block 内被修改</li>
+<li>用<code>__weak</code>修饰变量，可以解决 block 循环引用的问题</li>
+<li>用<code>__strong</code>修饰变量，可以防止 block 中引用的外部变量在 block 执行时被提前释放的问题</li>
+</ul>
+<p><br></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 在 ARC 中防止循环引用，需要将 self 或其他变量进行 weak 化，__typeof(self)是获取 self 的类型</span><br><span class="line">__weak MyController *weakSelf = self </span><br><span class="line">__weak typeof(self) weakSelf = self;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<ul>
+<li>如果 block 内部代码不是异步执行，则此时的 strongSelf 变量是可以省略</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">// strongSelf 是 block 内部的一个局部变量，作用域仅限于 block 内部，程序一旦跳出作用域，</span><br><span class="line">// strongSelf 就会被释放，这个临时产生的“循环引用”就会被自动打破，不会对 self 一直进行</span><br><span class="line">// 强引用，其作用就是为了让 self 在 block 的生命周期中不会被提前释放</span><br><span class="line"></span><br><span class="line">__weak typeof(self) weakSelf = self;  </span><br><span class="line">self.block = ^&#123;  </span><br><span class="line">    __strong typeof(weakSelf) strongSelf = weakSelf; // 不可以省略</span><br><span class="line">    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;  </span><br><span class="line">       [NSThread sleepForTimeInterval:5];  </span><br><span class="line">        [strongSelf print]; </span><br><span class="line">   &#125;);  </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">__weak typeof(self) weakSelf = self;  </span><br><span class="line">self.block = ^&#123;  </span><br><span class="line">    __strong typeof(weakSelf) strongSelf = weakSelf; // 可以省略</span><br><span class="line">    [strongSelf print];  </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 直接定义一个 block 属性，index 是参数，无返回值</span><br><span class="line">@property (nonatomic, copy) void(^readSuccess)(NSInteger index);</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 先定义一个 block，然后再使用</span><br><span class="line">typedef void(^FuckSuccess)(void);</span><br><span class="line">。。。</span><br><span class="line">@property (nonatomic, copy) FuckSuccess success;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">NSString *aString = @&quot;Hey!&quot;;</span><br><span class="line">void(^aBlock)(void) = ^&#123;</span><br><span class="line">    // 因 aString 没有用 __block 关键字修饰，在 block 中无法被修改</span><br><span class="line">    </span><br><span class="line">    NSLog(@&quot;%@&quot;, aString);</span><br><span class="line">&#125;;</span><br><span class="line">aString = @&quot;fuck&quot;;</span><br><span class="line">    </span><br><span class="line">// 只有当 aString 用 __block/static 修饰或者定义为全局变量时，在定义 block 之后修改 aString 变量才有效，</span><br><span class="line">// 否则在 block 中取到的 aString 值是在定义该 block 之前的值</span><br><span class="line">aBlock();</span><br><span class="line">    </span><br><span class="line">NSLog(@&quot;%@&quot;, aString);</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<ul>
+<li>aString 没有用 __block 修饰时：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2018-04-02 22:41:11.596957+0800 Test_3[12376:1852822] Hey!</span><br><span class="line">2018-04-02 22:41:11.597102+0800 Test_3[12376:1852822] fuck</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>aString 有用 __block 修饰时：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2018-04-02 22:41:42.692088+0800 Test_3[12401:1854704] fuck</span><br><span class="line">2018-04-02 22:41:42.692210+0800 Test_3[12401:1854704] fuck</span><br></pre></td></tr></table></figure>
+<p><br><br><br><br><code>引用官方文档：</code></p>
+<h5 id="Use-block-Variables-to-Share-Storage"><a href="#Use-block-Variables-to-Share-Storage" class="headerlink" title="Use __block Variables to Share Storage"></a>Use __block Variables to Share Storage</h5><p><strong>If you need to be able to change the value of a captured variable from within a block, you can use the __block storage type modifier on the original variable declaration. This means that the variable lives in storage that is shared between the lexical scope of the original variable and any blocks declared within that scope.</strong></p>
+<p>大致意思是：用 __block 修饰的变量，存活在 原始变量的词法范围 和 声明的 block 之间共享的存储中。</p>
+<p><br><br><br><br><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/block/">block</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://cfap.github.io/2017/07/18/Block/" data-title="block | 周二" data-tsina="undefined" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/07/18/Audio&Video/" title="音视频">
+  <strong>上一篇：</strong><br/>
+  <span>
+  音视频</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/07/18/DataStorage/"  title="数据存储">
+ <strong>下一篇：</strong><br/> 
+ <span>数据存储
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS（26）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/macOS/" title="macOS">macOS（1）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/爱好/" title="爱好">爱好（4）</a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/零散/" title="零散">零散<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/多线程/" title="多线程">多线程<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/网络/" title="网络">网络<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/数据存储/" title="数据存储">数据存储<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/block/" title="block">block<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/音视频/" title="音视频">音视频<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内存管理/" title="内存管理">内存管理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/算法/" title="算法">算法<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL-ES-2-0/" title="OpenGL ES 2.0">OpenGL ES 2.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/RunLoop/" title="RunLoop">RunLoop<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Runtime/" title="Runtime">Runtime<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+	<p class="copyright" style="margin-top: 10px;">
+	Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018
+	
+	<a href="/about" target="_blank" title="取名很蛋疼">取名很蛋疼</a>
+	
+
+	</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-28029597-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

@@ -1,0 +1,487 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>多线程：NSThread | 周二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="取名很蛋疼">
+    
+
+    
+    <meta name="description" content="特点 简单易用，可以直接操作线程对象 一个 NSThread 对象就是一个线程 线程的生命周期需要程序员手动管理 线程在执行完任务后就会退出并销毁   NSThread 简单使用。  先创建线程，再启动线程  12345678910111213- (void)useNSThread &amp;#123;    // 1. 创建线程    NSThread *thread = [[NSThread allo">
+<meta name="keywords" content="多线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多线程：NSThread">
+<meta property="og:url" content="https://cfap.github.io/2018/03/27/NSThread/index.html">
+<meta property="og:site_name" content="周二">
+<meta property="og:description" content="特点 简单易用，可以直接操作线程对象 一个 NSThread 对象就是一个线程 线程的生命周期需要程序员手动管理 线程在执行完任务后就会退出并销毁   NSThread 简单使用。  先创建线程，再启动线程  12345678910111213- (void)useNSThread &amp;#123;    // 1. 创建线程    NSThread *thread = [[NSThread allo">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://cfap.github.io/media/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81.png">
+<meta property="og:updated_time" content="2018-04-03T03:09:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="多线程：NSThread">
+<meta name="twitter:description" content="特点 简单易用，可以直接操作线程对象 一个 NSThread 对象就是一个线程 线程的生命周期需要程序员手动管理 线程在执行完任务后就会退出并销毁   NSThread 简单使用。  先创建线程，再启动线程  12345678910111213- (void)useNSThread &amp;#123;    // 1. 创建线程    NSThread *thread = [[NSThread allo">
+<meta name="twitter:image" content="https://cfap.github.io/media/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.png">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="周二">周二</a></h1>
+				<h2 class="blog-motto">不做评论</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:cfap.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/03/27/NSThread/" title="多线程：NSThread" itemprop="url">多线程：NSThread</a>
+  </h1>
+  
+  <p class="article-time">
+    <time datetime="2018-03-27T09:50:49.000Z" itemprop="datePublished"> 发表于 2018-03-27 17:50:49</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		<h4 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h4><ul>
+<li>简单易用，可以直接操作线程对象</li>
+<li>一个 NSThread 对象就是一个线程</li>
+<li>线程的生命周期需要程序员手动管理</li>
+<li>线程在执行完任务后就会退出并销毁</li>
+</ul>
+<p><br><br><br></p>
+<h4 id="NSThread-简单使用。"><a href="#NSThread-简单使用。" class="headerlink" title="NSThread 简单使用。"></a>NSThread 简单使用。</h4><p><br></p>
+<ul>
+<li>先创建线程，再启动线程</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">- (void)useNSThread &#123;</span><br><span class="line">    // 1. 创建线程</span><br><span class="line">    NSThread *thread = [[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil];</span><br><span class="line">    </span><br><span class="line">    // 2. 启动线程</span><br><span class="line">    [thread start];</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 新线程调用方法，里边为需要执行的任务</span><br><span class="line">- (void)run &#123;</span><br><span class="line">     NSLog(@&quot;%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>创建线程后自动启动线程</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 创建线程后自动启动线程</span><br><span class="line">[NSThread detachNewThreadSelector:@selector(run) toTarget:self withObject:nil];</span><br><span class="line"></span><br><span class="line">- (void)run &#123;</span><br><span class="line">     NSLog(@&quot;%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>隐式创建并启动线程</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">// 隐式创建并启动线程</span><br><span class="line">[self performSelectorInBackground:@selector(run) withObject:nil];</span><br><span class="line"></span><br><span class="line">// 在新线程执行方法</span><br><span class="line">- (void)run &#123;</span><br><span class="line">     NSLog(@&quot;%@&quot;, [NSThread currentThread]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<h4 id="线程相关用法"><a href="#线程相关用法" class="headerlink" title="线程相关用法"></a>线程相关用法</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">// 获得主线程</span><br><span class="line">+ (NSThread *)mainThread;    </span><br><span class="line"></span><br><span class="line">// 判断是否为主线程(对象方法)</span><br><span class="line">- (BOOL)isMainThread;</span><br><span class="line"></span><br><span class="line">// 判断是否为主线程(类方法)</span><br><span class="line">+ (BOOL)isMainThread;    </span><br><span class="line"></span><br><span class="line">// 获得当前线程</span><br><span class="line">NSThread *current = [NSThread currentThread]; </span><br><span class="line"></span><br><span class="line">// 线程的名字</span><br><span class="line">- (NSString *)name; </span><br><span class="line"></span><br><span class="line">// 启动线程，线程状态：新建状态 -&gt; 就绪状态。当线程任务执行完毕，自动进入死亡状态</span><br><span class="line">- (void)start;</span><br><span class="line"></span><br><span class="line">// 阻塞线程</span><br><span class="line">+ (void)sleepUntilDate:(NSDate *)date;</span><br><span class="line">+ (void)sleepForTimeInterval:(NSTimeInterval)ti;</span><br><span class="line"></span><br><span class="line">// 强制立即终止当前执行的任务，线程进入死亡状态</span><br><span class="line">+ (void)exit;</span><br><span class="line"></span><br><span class="line">// 取消线程，调用该方法会设置 cancelled 属性为 YES，但并不退出线程</span><br><span class="line">- (void)cancel;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>线程之间的通信<br>在开发中，我们经常会在子线程进行耗时操作，执行完再回到主线程更新 UI。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 在主线程上执行操作</span><br><span class="line">- (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait;</span><br><span class="line">- (void)performSelectorOnMainThread:(SEL)aSelector withObject:(id)arg waitUntilDone:(BOOL)wait modes:(NSArray&lt;NSString *&gt; *)array;</span><br><span class="line"></span><br><span class="line">// 在指定线程上执行操作</span><br><span class="line">- (void)performSelector:(SEL)aSelector onThread:(NSThread *)thr withObject:(id)arg waitUntilDone:(BOOL)wait modes:(NSArray *)array;</span><br><span class="line">- (void)performSelector:(SEL)aSelector onThread:(NSThread *)thr withObject:(id)arg waitUntilDone:(BOOL)wait;</span><br><span class="line"></span><br><span class="line">// 在当前线程上执行操作</span><br><span class="line">- (id)performSelector:(SEL)aSelector;</span><br><span class="line">- (id)performSelector:(SEL)aSelector withObject:(id)object;</span><br><span class="line">- (id)performSelector:(SEL)aSelector withObject:(id)object1 withObject:(id)object2;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<ul>
+<li>下面通过一个经典的下载图片 DEMO 代码来展示线程之间的通信：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 创建一个线程下载图片</span><br><span class="line"> */</span><br><span class="line">- (void)downloadImageOnSubThread &#123;</span><br><span class="line">    // 在创建的子线程中调用downloadImage下载图片</span><br><span class="line">    [NSThread detachNewThreadSelector:@selector(downloadImage) toTarget:self withObject:nil];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 下载图片，下载完之后回到主线程进行 UI 刷新</span><br><span class="line"> */</span><br><span class="line">- (void)downloadImage &#123;</span><br><span class="line">    NSLog(@&quot;current thread -- %@&quot;, [NSThread currentThread]);</span><br><span class="line">    </span><br><span class="line">    // 1. 获取图片 imageUrl</span><br><span class="line">    NSURL *imageUrl = [NSURL URLWithString:@&quot;https://ysc-demo-1254961422.file.myqcloud.com/YSC-phread-NSThread-demo-icon.jpg&quot;];</span><br><span class="line">    </span><br><span class="line">    // 2. 从 imageUrl 中读取数据(下载图片) -- 耗时操作</span><br><span class="line">    NSData *imageData = [NSData dataWithContentsOfURL:imageUrl];</span><br><span class="line">    // 通过二进制 data 创建 image</span><br><span class="line">    UIImage *image = [UIImage imageWithData:imageData];</span><br><span class="line">    </span><br><span class="line">    // 3. 回到主线程，YES 表示立即进行图片赋值和界面刷新</span><br><span class="line">    [self performSelectorOnMainThread:@selector(refreshOnMainThread:) withObject:image waitUntilDone:YES];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/**</span><br><span class="line"> * 回到主线程进行图片赋值和界面刷新</span><br><span class="line"> */</span><br><span class="line">- (void)refreshOnMainThread:(UIImage *)image &#123;</span><br><span class="line">    NSLog(@&quot;current thread -- %@&quot;, [NSThread currentThread]);</span><br><span class="line">    </span><br><span class="line">    // 赋值图片到imageview</span><br><span class="line">    self.imageView.image = image;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<h4 id="NSThread-线程安全"><a href="#NSThread-线程安全" class="headerlink" title="NSThread 线程安全"></a>NSThread 线程安全</h4><p>线程安全的解决方案就是加锁。iOS 实现线程加锁有很多种方式：@synchronized、 NSLock、NSRecursiveLock、NSCondition、NSConditionLock、pthread_mutex、dispatch_semaphore、OSSpinLock、atomic(property) set/get 等等各种方式。为了简单起见，这里不对各种锁的使用方式和性能做分析，只用最简单的 @synchronized 来保证线程安全，从而解决线程同步问题。</p>
+<p>使用 @synchronized 包围的代码即为同步代码块，同步代码块需要一个监听器，我们使用 self 本身作为监听器，因为是 self 对象产生的竞争条件，当执行同步代码块时需要先获取监听器，如果获取不到则线程会被阻塞，当同步代码块执行完成则释放监听器。</p>
+<p>考虑线程安全的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> * 售卖火车票(线程安全)</span><br><span class="line"> */</span><br><span class="line">- (void)saleTicketSafe &#123;</span><br><span class="line">    while (1) &#123;</span><br><span class="line">        // 互斥锁</span><br><span class="line">        @synchronized (self) &#123;</span><br><span class="line">            //如果还有票，继续售卖</span><br><span class="line">            if (self.ticketSurplusCount &gt; 0) &#123;</span><br><span class="line">                self.ticketSurplusCount --;</span><br><span class="line">                NSLog(@&quot;%@&quot;, [NSString stringWithFormat:@&quot;剩余票数：%ld 窗口：%@&quot;, self.ticketSurplusCount, [NSThread currentThread].name]);</span><br><span class="line">                [NSThread sleepForTimeInterval:0.2];</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                NSLog(@&quot;所有火车票均已售完&quot;);</span><br><span class="line">                break;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<h4 id="NSCondition-锁的使用"><a href="#NSCondition-锁的使用" class="headerlink" title="NSCondition 锁的使用"></a>NSCondition 锁的使用</h4><p><code>NSCondition</code> 实现了<code>NSLocking</code>协议，所以它同样具有锁的功能，与<code>NSLock</code>一样可以获取锁与释放锁的操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">NS_CLASS_AVAILABLE(10_5, 2_0)</span><br><span class="line">@interface NSCondition : NSObject &lt;NSLocking&gt; &#123;</span><br><span class="line"></span><br><span class="line">/*</span><br><span class="line">阻塞线程，直到其他线程调用该对象的 signal 方法或 broadcast 方法来唤醒</span><br><span class="line">唤醒后该线程从阻塞态变为就绪态，交由系统进行线程调度</span><br><span class="line">调用 wait 方法时内部会自动执行 unlock 方法释放锁，并阻塞线程</span><br><span class="line">*/</span><br><span class="line">- (void)wait;</span><br><span class="line"></span><br><span class="line">// 同上，只是该方法是在 limit 到达时唤醒线程</span><br><span class="line">- (BOOL)waitUntilDate:(NSDate *)limit;</span><br><span class="line"></span><br><span class="line">// 随机唤醒一个在当前 NSCondition 对象上阻塞的一个线程，使其从阻塞态进入就绪态</span><br><span class="line">- (void)signal;</span><br><span class="line"></span><br><span class="line">// 唤醒在当前 NSCondition 对象上阻塞的所有线程</span><br><span class="line">- (void)broadcast;</span><br><span class="line"></span><br><span class="line">// 设置名称</span><br><span class="line">@property (nullable, copy) NSString *name;</span><br><span class="line"></span><br><span class="line">@end</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h5 id="使用事例"><a href="#使用事例" class="headerlink" title="使用事例"></a>使用事例</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line">// 取钱</span><br><span class="line">- (void)draw:(id)money &#123;</span><br><span class="line">    // 设置消费者取钱20次</span><br><span class="line">    NSUInteger count = 0;</span><br><span class="line">    </span><br><span class="line">    while (count &lt; 20) &#123;</span><br><span class="line">        // 上锁，如果其他线程已经上锁则阻塞</span><br><span class="line">        [self.condition lock];</span><br><span class="line">        </span><br><span class="line">        // 判断是否有钱</span><br><span class="line">        if (self.haveMoney) &#123;</span><br><span class="line">            // 有钱则进行取钱的操作，并设置 haveMoney 为 NO</span><br><span class="line">            self.balance -= [money doubleValue];</span><br><span class="line">            self.haveMoney = NO;</span><br><span class="line">            count += 1;</span><br><span class="line">            NSLog(@&quot;%@ draw money %lf %lf&quot;, [[NSThread currentThread] name], [money doubleValue], self.balance);</span><br><span class="line">            </span><br><span class="line">            // 取钱操作完成后唤醒其他在等待的所有线程</span><br><span class="line">            [self.condition broadcast];</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            // 如果没有钱则在此等待，并阻塞</span><br><span class="line">            [self.condition wait];</span><br><span class="line">            // 如果阻塞的线程被唤醒后会继续执行代码</span><br><span class="line">            NSLog(@&quot;%@ wake up&quot;, [[NSThread currentThread] name]);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        // 释放锁</span><br><span class="line">        [self.condition unlock];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 存钱</span><br><span class="line">- (void)deposite:(id)money &#123;</span><br><span class="line">    // 创建了三个取钱线程，每个取钱20次，则存钱60次</span><br><span class="line">    NSUInteger count = 0;</span><br><span class="line">    </span><br><span class="line">    while (count &lt; 60) &#123;</span><br><span class="line">    </span><br><span class="line">        // 上锁，如果其他线程上锁了则阻塞</span><br><span class="line">        [self.condition lock];</span><br><span class="line">        </span><br><span class="line">        // 判断如果没有钱则进行存钱操作</span><br><span class="line">        if (!self.haveMoney) &#123;</span><br><span class="line">            // 进行存钱操作，并设置 haveMoney 为 YES</span><br><span class="line">            self.balance += [money doubleValue];</span><br><span class="line">            self.haveMoney = YES;</span><br><span class="line">            count += 1;</span><br><span class="line">            NSLog(@&quot;Deposite money %lf %lf&quot;, [money doubleValue], self.balance);</span><br><span class="line">            </span><br><span class="line">            // 唤醒其他所有在等待的线程</span><br><span class="line">            [self.condition broadcast];</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            // 如果有钱则等待</span><br><span class="line">            [self.condition wait];</span><br><span class="line">            NSLog(@&quot;Deposite Thread wake up&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        // 释放锁</span><br><span class="line">        [self.condition unlock];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)useNSCondition &#123;</span><br><span class="line">    </span><br><span class="line">    Account *account = [[Account alloc] init];</span><br><span class="line">    account.accountNumber = @&quot;1603121434&quot;;</span><br><span class="line">    account.balance = 0;</span><br><span class="line">    </span><br><span class="line">    // 消费者线程1，每次取 1000 元</span><br><span class="line">    NSThread *thread1 = [[NSThread alloc] initWithTarget:account selector:@selector(draw:) object:@(1000)];</span><br><span class="line">    [thread1 setName:@&quot;consumer1&quot;];</span><br><span class="line">    </span><br><span class="line">    // 消费者线程2，每次取 1000 元</span><br><span class="line">    NSThread *thread2 = [[NSThread alloc] initWithTarget:account selector:@selector(draw:) object:@(1000)];</span><br><span class="line">    [thread2 setName:@&quot;consumer2&quot;];</span><br><span class="line">    </span><br><span class="line">    // 生产者线程3，每次存 1000 元</span><br><span class="line">    NSThread *thread3 = [[NSThread alloc] initWithTarget:account selector:@selector(deposite:) object:@(1000)];</span><br><span class="line">    [thread3 setName:@&quot;productor&quot;];</span><br><span class="line">    </span><br><span class="line">    [thread1 start];</span><br><span class="line">    [thread2 start];</span><br><span class="line">    [thread3 start];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<h4 id="线程的状态转换"><a href="#线程的状态转换" class="headerlink" title="线程的状态转换"></a>线程的状态转换</h4><p>线程的几种状态：<code>新建 - 就绪 - 运行 - 阻塞 - 死亡</code></p>
+<ul>
+<li>新建一条线程时，线程是<code>新建</code>状态。</li>
+<li>调用 <code>[thread start];</code> 后，系统把线程对象放入可调度线程池中，线程对象进入<code>就绪</code>状态。</li>
+<li>如果 CPU 正在调度当前线程对象，则当前线程对象进入<code>运行</code>状态，如果调度其他线程，则当前线程又回到<code>就绪</code>状态。</li>
+<li>如果正在运行的线程调用了<code>sleep</code>方法 \ 等待同步锁，则当前线程就进入了<code>阻塞</code>状态，等到<code>sleep</code>到时 \ 得到同步锁，就会回到<code>就绪</code>状态。</li>
+<li>如果正在运行的线程 任务执行完 \ 异常退出 \ 调用<code>exit</code>方法，则当前线程对象进入<code>死亡</code>状态。</li>
+</ul>
+<p><br><br><img src="/media/%E7%BA%BF%E7%A8%8B%E7%8A%B6%E6%80%81.png" alt="线程状态"></p>
+<p><br><br><br><br><br><br><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/多线程/">多线程</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://cfap.github.io/2018/03/27/NSThread/" data-title="多线程：NSThread | 周二" data-tsina="undefined" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/03/28/GCD/" title="多线程：GCD">
+  <strong>上一篇：</strong><br/>
+  <span>
+  多线程：GCD</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/03/18/NSOperation & NSOperationQueue/"  title="多线程：NSOperation、NSOperationQueue">
+ <strong>下一篇：</strong><br/> 
+ <span>多线程：NSOperation、NSOperationQueue
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS（26）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/macOS/" title="macOS">macOS（1）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/爱好/" title="爱好">爱好（4）</a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/零散/" title="零散">零散<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/多线程/" title="多线程">多线程<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/网络/" title="网络">网络<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/数据存储/" title="数据存储">数据存储<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/block/" title="block">block<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/音视频/" title="音视频">音视频<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内存管理/" title="内存管理">内存管理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/算法/" title="算法">算法<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL-ES-2-0/" title="OpenGL ES 2.0">OpenGL ES 2.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/RunLoop/" title="RunLoop">RunLoop<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Runtime/" title="Runtime">Runtime<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+	<p class="copyright" style="margin-top: 10px;">
+	Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018
+	
+	<a href="/about" target="_blank" title="取名很蛋疼">取名很蛋疼</a>
+	
+
+	</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-28029597-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

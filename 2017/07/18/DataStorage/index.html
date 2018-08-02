@@ -1,0 +1,464 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>数据存储 | 周二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="取名很蛋疼">
+    
+
+    
+    <meta name="description" content="几种数据存储方式 plist 属性列表 NSKeyedArchiver Keychain（保存帐号、凭证等少量数据） Core Data SQLite 3   plist 属性列表12345678910111213141516171819202122232425262728293031323334// 把 key 和 value 存入 /Library/Preferences/xxxxx.plis">
+<meta name="keywords" content="数据存储">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据存储">
+<meta property="og:url" content="https://cfap.github.io/2017/07/18/DataStorage/index.html">
+<meta property="og:site_name" content="周二">
+<meta property="og:description" content="几种数据存储方式 plist 属性列表 NSKeyedArchiver Keychain（保存帐号、凭证等少量数据） Core Data SQLite 3   plist 属性列表12345678910111213141516171819202122232425262728293031323334// 把 key 和 value 存入 /Library/Preferences/xxxxx.plis">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://cfap.github.io/media/coredata.png">
+<meta property="og:updated_time" content="2018-08-02T07:00:58.782Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数据存储">
+<meta name="twitter:description" content="几种数据存储方式 plist 属性列表 NSKeyedArchiver Keychain（保存帐号、凭证等少量数据） Core Data SQLite 3   plist 属性列表12345678910111213141516171819202122232425262728293031323334// 把 key 和 value 存入 /Library/Preferences/xxxxx.plis">
+<meta name="twitter:image" content="https://cfap.github.io/media/coredata.png">
+
+    
+    <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.png">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="周二">周二</a></h1>
+				<h2 class="blog-motto">不做评论</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:cfap.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2017/07/18/DataStorage/" title="数据存储" itemprop="url">数据存储</a>
+  </h1>
+  
+  <p class="article-time">
+    <time datetime="2017-07-18T08:04:52.000Z" itemprop="datePublished"> 发表于 2017-07-18 16:04:52</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		<h1 id="几种数据存储方式"><a href="#几种数据存储方式" class="headerlink" title="几种数据存储方式"></a>几种数据存储方式</h1><ul>
+<li>plist 属性列表</li>
+<li>NSKeyedArchiver</li>
+<li>Keychain（保存帐号、凭证等少量数据）</li>
+<li>Core Data</li>
+<li>SQLite 3</li>
+</ul>
+<p><br><br><br></p>
+<h2 id="plist-属性列表"><a href="#plist-属性列表" class="headerlink" title="plist 属性列表"></a>plist 属性列表</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">// 把 key 和 value 存入 /Library/Preferences/xxxxx.plist 属性列表文件中，xxxxx 是 bundle id </span><br><span class="line">[[NSUserDefaults standardUserDefaults] setInteger:5 forKey:@&quot;age&quot;];</span><br><span class="line">NSInteger age = [[NSUserDefaults standardUserDefaults] integerForKey:@&quot;age&quot;];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// ======================================================================================</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#pragma mark 存储在自定义的 plist 文件中，可以存储 字典 和 数组</span><br><span class="line">- (void)writeDict &#123;</span><br><span class="line">    NSMutableDictionary *dict = [NSMutableDictionary dictionary];</span><br><span class="line">    [dict setObject:@&quot;张三&quot; forKey:@&quot;name&quot;];</span><br><span class="line">    [dict setObject:@(18) forKey:@&quot;age&quot;];</span><br><span class="line">    </span><br><span class="line">    // 获取应用沙盒的根路径</span><br><span class="line">    NSString *home = NSHomeDirectory();</span><br><span class="line">    NSString *documents = [home stringByAppendingPathComponent:@&quot;Documents&quot;];</span><br><span class="line">    // 属性列表的默认拓展名是 plist</span><br><span class="line">    NSString *path = [documents stringByAppendingPathComponent:@&quot;dict.plist&quot;];</span><br><span class="line">    </span><br><span class="line">    [dict writeToFile:path atomically:YES];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)readDict &#123;</span><br><span class="line">    // 获取应用沙盒的根路径</span><br><span class="line">    NSString *home = NSHomeDirectory();</span><br><span class="line">    NSString *documents = [home stringByAppendingPathComponent:@&quot;Documents&quot;];</span><br><span class="line">    // 属性列表的默认拓展名是plist</span><br><span class="line">    NSString *path = [documents stringByAppendingPathComponent:@&quot;dict.plist&quot;];</span><br><span class="line">    </span><br><span class="line">    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:path];</span><br><span class="line">    </span><br><span class="line">    NSLog(@&quot;%@&quot;, dict);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br><br><br></p>
+<h2 id="NSKeyedArchiver"><a href="#NSKeyedArchiver" class="headerlink" title="NSKeyedArchiver"></a>NSKeyedArchiver</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 归档（待归档的类需要实现 NSCoding 协议的两个方法，否则运行会报错）</span><br><span class="line">NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self.person];</span><br><span class="line">[data writeToFile:path atomically:YES];</span><br><span class="line">    </span><br><span class="line">// 解档</span><br><span class="line">Person *p = [NSKeyedUnarchiver unarchiveObjectWithData:data];</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h2 id="Keychain"><a href="#Keychain" class="headerlink" title="Keychain"></a>Keychain</h2><ul>
+<li>相当于是一个系统自带的数据库，可存储帐号密码等小量的数据（增、删、改、查）</li>
+<li>存储在 Keychain 中的数据，在删除 APP 后数据还存在设备中，下次安装 APP 还能获取之前存的数据</li>
+<li>可以将数据归档为 NSData 后存入 Keychain ；取出 NSData 后解档</li>
+<li>可以使用第三方库 <a href="https://github.com/soffes/SAMKeychain" target="_blank" rel="noopener">SAMKeychain</a></li>
+</ul>
+<p><br><br><br></p>
+<h2 id="Core-Data"><a href="#Core-Data" class="headerlink" title="Core Data"></a>Core Data</h2><ul>
+<li>可以使用第三方库 <a href="https://github.com/magicalpanda/MagicalRecord" target="_blank" rel="noopener">MagicalRecord</a></li>
+<li><a href="http://www.cnblogs.com/mjios/archive/2013/02/26/2932999.html" target="_blank" rel="noopener">Core Data入门</a></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line">// OC 语言，底层是基于 SQLite 3</span><br><span class="line"></span><br><span class="line">- (void)useCoreData &#123;</span><br><span class="line">    </span><br><span class="line">    // ================================ 创建上下文 ========================================================</span><br><span class="line">    </span><br><span class="line">    // 多个 Data Model 文件时用以下方法获取，注意 Model.xcdatamodel 文件的扩展名要写 &quot;momd&quot; </span><br><span class="line">    // NSURL *companyURL = [[NSBundle mainBundle] URLForResource:&quot;Model&quot; withExtension:@&quot;momd&quot;]; </span><br><span class="line">    // NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:companyURL]; </span><br><span class="line">    </span><br><span class="line">    // 单个文件时加载模型文件</span><br><span class="line">    NSManagedObjectModel *model = [NSManagedObjectModel mergedModelFromBundles:nil];</span><br><span class="line">    </span><br><span class="line">    // 传入模型对象，初始化 NSPersistentStoreCoordinator</span><br><span class="line">    NSPersistentStoreCoordinator *psc = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel: model];</span><br><span class="line">    </span><br><span class="line">    // 构建 SQLite 数据库文件的路径</span><br><span class="line">    NSString *docs = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];</span><br><span class="line">    NSURL *url = [NSURL fileURLWithPath:[docs stringByAppendingPathComponent:@&quot;person.data&quot;]];</span><br><span class="line">    </span><br><span class="line">    // 添加持久化存储库，这里使用 SQLite 作为存储库</span><br><span class="line">    NSError *error = nil;</span><br><span class="line">    NSPersistentStore *store = [psc addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:url options:nil error:&amp;error];</span><br><span class="line">    if (store == nil) &#123; // 直接抛异常</span><br><span class="line">        [NSException raise:@&quot;添加数据库错误&quot; format:@&quot;%@&quot;, [error localizedDescription]];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 初始化上下文，设置 persistentStoreCoordinator 属性</span><br><span class="line">    NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];</span><br><span class="line">    </span><br><span class="line">    context.persistentStoreCoordinator = psc;</span><br><span class="line">    </span><br><span class="line">    // 用完之后，记得要 release</span><br><span class="line">    // [context release];</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    // ================================ 新增 ========================================================</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    // 传入上下文，创建一个 Person 实体对象</span><br><span class="line">    NSManagedObject *person = [NSEntityDescription insertNewObjectForEntityForName:@&quot;Person&quot; inManagedObjectContext:context];</span><br><span class="line">    // 设置Person的简单属性</span><br><span class="line">    [person setValue:@&quot;Jack&quot; forKey:@&quot;name&quot;];</span><br><span class="line">    [person setValue:[NSNumber numberWithInt:27] forKey:@&quot;age&quot;];</span><br><span class="line">    </span><br><span class="line">    // 传入上下文，创建一个 Card 实体对象</span><br><span class="line">    NSManagedObject *book = [NSEntityDescription insertNewObjectForEntityForName:@&quot;Book&quot; inManagedObjectContext:context];</span><br><span class="line">    [book setValue:@20.9 forKey:@&quot;price&quot;];</span><br><span class="line">    </span><br><span class="line">    // 设置 Person 和 Card 之间的关联关系</span><br><span class="line">    [person setValue:book forKey:@&quot;book&quot;];</span><br><span class="line">    </span><br><span class="line">    // 利用上下文对象，将数据同步到持久化存储库</span><br><span class="line">    error = nil;</span><br><span class="line">    BOOL success = [context save:&amp;error];</span><br><span class="line">    if (!success) &#123;</span><br><span class="line">        [NSException raise:@&quot;访问数据库错误&quot; format:@&quot;%@&quot;, [error localizedDescription]];</span><br><span class="line">    &#125;</span><br><span class="line">    // 如果是想做更新操作：只要在更改了实体对象的属性后调用 [context save:&amp;error]，就能将更改的数据同步到数据库</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    // ================================ 查询 ========================================================</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    // 初始化一个查询请求</span><br><span class="line">    NSFetchRequest *request = [[NSFetchRequest alloc] init];</span><br><span class="line">    </span><br><span class="line">    // 设置要查询的实体</span><br><span class="line">    request.entity = [NSEntityDescription entityForName:@&quot;Person&quot; inManagedObjectContext:context];</span><br><span class="line">    </span><br><span class="line">    // 设置排序（按照age降序）</span><br><span class="line">    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@&quot;age&quot; ascending:NO];</span><br><span class="line">    request.sortDescriptors = [NSArray arrayWithObject:sort];</span><br><span class="line">    </span><br><span class="line">    // 设置条件过滤(搜索name中包含字符串&quot;Jack&quot;的记录，注意：设置条件过滤时，数据库SQL语句中的%要用*来代替，所以%Jack%应该写成*Jack*)</span><br><span class="line">    NSPredicate *predicate = [NSPredicate predicateWithFormat:@&quot;name like %@&quot;, @&quot;*Jack*&quot;];</span><br><span class="line">    request.predicate = predicate;</span><br><span class="line">    </span><br><span class="line">    // 执行请求</span><br><span class="line">    error = nil;</span><br><span class="line">    NSArray *objs = [context executeFetchRequest:request error:&amp;error];</span><br><span class="line">    if (error) &#123;</span><br><span class="line">        [NSException raise:@&quot;查询错误&quot; format:@&quot;%@&quot;, [error localizedDescription]];</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 遍历数据</span><br><span class="line">    for (NSManagedObject *obj in objs) &#123;</span><br><span class="line">        NSLog(@&quot;name=%@&quot;, [obj valueForKey:@&quot;name&quot;]);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    // ================================ 删除 ========================================================</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    // 传入需要删除的实体对象</span><br><span class="line">    [context deleteObject:objs.firstObject];</span><br><span class="line">    </span><br><span class="line">    // 将结果同步到数据库</span><br><span class="line">    error = nil;</span><br><span class="line">    [context save:&amp;error];</span><br><span class="line">    if (error) &#123;</span><br><span class="line">        [NSException raise:@&quot;删除错误&quot; format:@&quot;%@&quot;, [error localizedDescription]];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        // 遍历数据</span><br><span class="line">        for (NSManagedObject *obj in objs) &#123;</span><br><span class="line">            NSLog(@&quot;name=%@&quot;, [obj valueForKey:@&quot;name&quot;]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// 创建数据库中的表对应的类：</span><br><span class="line">// 选中模型文件 -&gt; Editor -&gt; Create NSManagedObject Subclass... -&gt; 选择需要创建的类。。。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// 如果创建了对应的类，那么往数据库中添加数据的写法如下：</span><br><span class="line">Person *person = [NSEntityDescription insertNewObjectForEntityForName:@&quot;Person&quot; inManagedObjectContext:context];</span><br><span class="line">person.name = @&quot;张三&quot;;</span><br><span class="line">person.age = @(18);</span><br><span class="line">    </span><br><span class="line">Book *book = [NSEntityDescription insertNewObjectForEntityForName:@&quot;Book&quot; inManagedObjectContext:context];</span><br><span class="line">book.price = @(33.0);</span><br><span class="line">    </span><br><span class="line">person.book = book;</span><br><span class="line">    </span><br><span class="line">// 最后调用保存数据</span><br><span class="line">[context save&amp;error];</span><br></pre></td></tr></table></figure>
+<p><img src="/media/coredata.png" alt="coredata"></p>
+<p><br><br><br></p>
+<h2 id="SQLite-3"><a href="#SQLite-3" class="headerlink" title="SQLite 3"></a>SQLite 3</h2><ul>
+<li><a href="http://www.runoob.com/sqlite/sqlite-tutorial.html" target="_blank" rel="noopener">SQLite 教程</a></li>
+<li>可以使用第三方库 <a href="https://github.com/ccgus/fmdb" target="_blank" rel="noopener">fmdb</a></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">// C 语言</span><br></pre></td></tr></table></figure>
+<p><br><br><br><br><br><br><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/数据存储/">数据存储</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://cfap.github.io/2017/07/18/DataStorage/" data-title="数据存储 | 周二" data-tsina="undefined" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2017/07/18/Block/" title="block">
+  <strong>上一篇：</strong><br/>
+  <span>
+  block</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2017/07/18/Runloop/"  title="运行循环">
+ <strong>下一篇：</strong><br/> 
+ <span>运行循环
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS（26）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/macOS/" title="macOS">macOS（1）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/爱好/" title="爱好">爱好（4）</a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/零散/" title="零散">零散<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/多线程/" title="多线程">多线程<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/网络/" title="网络">网络<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/数据存储/" title="数据存储">数据存储<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/block/" title="block">block<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/音视频/" title="音视频">音视频<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内存管理/" title="内存管理">内存管理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/算法/" title="算法">算法<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL-ES-2-0/" title="OpenGL ES 2.0">OpenGL ES 2.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/RunLoop/" title="RunLoop">RunLoop<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Runtime/" title="Runtime">Runtime<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+	<p class="copyright" style="margin-top: 10px;">
+	Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018
+	
+	<a href="/about" target="_blank" title="取名很蛋疼">取名很蛋疼</a>
+	
+
+	</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-28029597-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

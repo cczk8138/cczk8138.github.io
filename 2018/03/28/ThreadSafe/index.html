@@ -1,0 +1,460 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>线程安全中的各种锁 | 周二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="取名很蛋疼">
+    
+
+    
+    <meta name="description" content="起底多线程同步锁(iOS)不再安全的 OSSpinLock探讨iOS开发中各种锁iOS 开发中的八种锁  除非开发者能保证访问锁的线程全部都处于同一优先级，否则 iOS 系统中所有类型的自旋锁都别再用。  加锁的几种方式1、synchronized1234// 性能最差，敲以下代码时 Xcode 没有提示，是否可以理解为 Apple 不建议使用这种加锁方式 ？@synchronized (对象，一">
+<meta name="keywords" content="多线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程安全中的各种锁">
+<meta property="og:url" content="https://cfap.github.io/2018/03/28/ThreadSafe/index.html">
+<meta property="og:site_name" content="周二">
+<meta property="og:description" content="起底多线程同步锁(iOS)不再安全的 OSSpinLock探讨iOS开发中各种锁iOS 开发中的八种锁  除非开发者能保证访问锁的线程全部都处于同一优先级，否则 iOS 系统中所有类型的自旋锁都别再用。  加锁的几种方式1、synchronized1234// 性能最差，敲以下代码时 Xcode 没有提示，是否可以理解为 Apple 不建议使用这种加锁方式 ？@synchronized (对象，一">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-06-28T10:13:44.378Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程安全中的各种锁">
+<meta name="twitter:description" content="起底多线程同步锁(iOS)不再安全的 OSSpinLock探讨iOS开发中各种锁iOS 开发中的八种锁  除非开发者能保证访问锁的线程全部都处于同一优先级，否则 iOS 系统中所有类型的自旋锁都别再用。  加锁的几种方式1、synchronized1234// 性能最差，敲以下代码时 Xcode 没有提示，是否可以理解为 Apple 不建议使用这种加锁方式 ？@synchronized (对象，一">
+
+    
+    <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.png">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="周二">周二</a></h1>
+				<h2 class="blog-motto">不做评论</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:cfap.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/03/28/ThreadSafe/" title="线程安全中的各种锁" itemprop="url">线程安全中的各种锁</a>
+  </h1>
+  
+  <p class="article-time">
+    <time datetime="2018-03-28T09:50:49.000Z" itemprop="datePublished"> 发表于 2018-03-28 17:50:49</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		<p><br><br><br><br><a href="http://www.cocoachina.com/ios/20160129/15170.html" target="_blank" rel="noopener">起底多线程同步锁(iOS)</a><br><a href="https://blog.ibireme.com/2016/01/16/spinlock_is_unsafe_in_ios/" target="_blank" rel="noopener">不再安全的 OSSpinLock</a><br><a href="https://blog.csdn.net/qq_30513483/article/details/53814482" target="_blank" rel="noopener">探讨iOS开发中各种锁</a><br><a href="https://www.jianshu.com/p/2d59ecd5e81d" target="_blank" rel="noopener">iOS 开发中的八种锁</a></p>
+<p><br></p>
+<p><code>除非开发者能保证访问锁的线程全部都处于同一优先级，否则 iOS 系统中所有类型的自旋锁都别再用。</code></p>
+<p><br></p>
+<h3 id="加锁的几种方式"><a href="#加锁的几种方式" class="headerlink" title="加锁的几种方式"></a>加锁的几种方式</h3><h4 id="1、synchronized"><a href="#1、synchronized" class="headerlink" title="1、synchronized"></a>1、synchronized</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// 性能最差，敲以下代码时 Xcode 没有提示，是否可以理解为 Apple 不建议使用这种加锁方式 ？</span><br><span class="line">@synchronized (对象，一般用self) &#123;</span><br><span class="line">    // ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="2、NSLock"><a href="#2、NSLock" class="headerlink" title="2、NSLock"></a>2、NSLock</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[self.lock lock];</span><br><span class="line">    // ......</span><br><span class="line">[self.lock unlock];</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="3、NSCondition"><a href="#3、NSCondition" class="headerlink" title="3、NSCondition"></a>3、NSCondition</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line">// NSCondition 实现了`NSLocking`协议，同样具有锁的功能，与`NSLock`一样可以加锁、解锁</span><br><span class="line"></span><br><span class="line">NS_CLASS_AVAILABLE(10_5, 2_0)</span><br><span class="line">@interface NSCondition : NSObject &lt;NSLocking&gt; &#123;</span><br><span class="line"></span><br><span class="line">/*</span><br><span class="line">阻塞线程，直到其他线程调用该对象的 signal 方法或 broadcast 方法来唤醒</span><br><span class="line">唤醒后该线程从阻塞态变为就绪态，交由系统进行线程调度</span><br><span class="line">调用 wait 方法时内部会自动执行 unlock 方法释放锁，并阻塞线程</span><br><span class="line">*/</span><br><span class="line">- (void)wait;</span><br><span class="line"></span><br><span class="line">// 同上，只是该方法是在 limit 到达时唤醒线程</span><br><span class="line">- (BOOL)waitUntilDate:(NSDate *)limit;</span><br><span class="line"></span><br><span class="line">// 随机唤醒一个在当前 NSCondition 对象上阻塞的一个线程，使其从阻塞态进入就绪态</span><br><span class="line">- (void)signal;</span><br><span class="line"></span><br><span class="line">// 唤醒在当前 NSCondition 对象上阻塞的所有线程</span><br><span class="line">- (void)broadcast;</span><br><span class="line"></span><br><span class="line">// 设置名称</span><br><span class="line">@property (nullable, copy) NSString *name;</span><br><span class="line"></span><br><span class="line">@end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// ===============================使用事例==================================</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// 取钱</span><br><span class="line">- (void)draw:(id)money &#123;</span><br><span class="line">    // 设置消费者取钱20次</span><br><span class="line">    NSUInteger count = 0;</span><br><span class="line">    </span><br><span class="line">    while (count &lt; 20) &#123;</span><br><span class="line">        // 首先使用condition上锁，如果其他线程已经上锁则阻塞</span><br><span class="line">        [self.condition lock];</span><br><span class="line">        </span><br><span class="line">        // 判断是否有钱</span><br><span class="line">        if (self.haveMoney) &#123;</span><br><span class="line">            // 有钱则进行取钱的操作，并设置haveMoney为NO</span><br><span class="line">            self.balance -= [money doubleValue];</span><br><span class="line">            self.haveMoney = NO;</span><br><span class="line">            count += 1;</span><br><span class="line">            NSLog(@&quot;%@ draw money %lf %lf&quot;, [[NSThread currentThread] name], [money doubleValue], self.balance);</span><br><span class="line">            </span><br><span class="line">            // 取钱操作完成后唤醒其他在此condition上等待的所有线程</span><br><span class="line">            [self.condition broadcast];</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            // 如果没有钱则在此condition上等待，并阻塞</span><br><span class="line">            [self.condition wait];</span><br><span class="line">            // 如果阻塞的线程被唤醒后会继续执行代码</span><br><span class="line">            NSLog(@&quot;%@ wake up&quot;, [[NSThread currentThread] name]);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        // 释放锁</span><br><span class="line">        [self.condition unlock];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 存钱</span><br><span class="line">- (void)deposite:(id)money &#123;</span><br><span class="line">    // 创建了三个取钱线程，每个取钱20次，则存钱60次</span><br><span class="line">    NSUInteger count = 0;</span><br><span class="line">    </span><br><span class="line">    while (count &lt; 60) &#123;</span><br><span class="line">    </span><br><span class="line">        // 上锁，如果其他线程上锁了则阻塞</span><br><span class="line">        [self.condition lock];</span><br><span class="line">        </span><br><span class="line">        // 判断如果没有钱则进行存钱操作</span><br><span class="line">        if (!self.haveMoney) &#123;</span><br><span class="line">            // 进行存钱操作，并设置 haveMoney 为 YES</span><br><span class="line">            self.balance += [money doubleValue];</span><br><span class="line">            self.haveMoney = YES;</span><br><span class="line">            count += 1;</span><br><span class="line">            NSLog(@&quot;Deposite money %lf %lf&quot;, [money doubleValue], self.balance);</span><br><span class="line">            </span><br><span class="line">            // 唤醒其他所有在condition上等待的线程</span><br><span class="line">            [self.condition broadcast];</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            // 如果有钱则等待</span><br><span class="line">            [self.condition wait];</span><br><span class="line">            NSLog(@&quot;Deposite Thread wake up&quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        // 释放锁</span><br><span class="line">        [self.condition unlock];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)useNSCondition &#123;</span><br><span class="line">    </span><br><span class="line">    Account *account = [[Account alloc] init];</span><br><span class="line">    account.accountNumber = @&quot;1603121434&quot;;</span><br><span class="line">    account.balance = 0;</span><br><span class="line">    </span><br><span class="line">    // 消费者线程1，每次取1000元</span><br><span class="line">    NSThread *thread1 = [[NSThread alloc] initWithTarget:account selector:@selector(draw:) object:@(1000)];</span><br><span class="line">    [thread1 setName:@&quot;consumer1&quot;];</span><br><span class="line">    </span><br><span class="line">    // 消费者线程2，每次取1000元</span><br><span class="line">    NSThread *thread2 = [[NSThread alloc] initWithTarget:account selector:@selector(draw:) object:@(1000)];</span><br><span class="line">    [thread2 setName:@&quot;consumer2&quot;];</span><br><span class="line">    </span><br><span class="line">    // 生产者线程3，每次存1000元</span><br><span class="line">    NSThread *thread3 = [[NSThread alloc] initWithTarget:account selector:@selector(deposite:) object:@(1000)];</span><br><span class="line">    [thread3 setName:@&quot;productor&quot;];</span><br><span class="line">    </span><br><span class="line">    [thread1 start];</span><br><span class="line">    [thread2 start];</span><br><span class="line">    [thread3 start];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="4、NSConditionLock"><a href="#4、NSConditionLock" class="headerlink" title="4、NSConditionLock"></a>4、NSConditionLock</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">// NSConditionLock 条件锁</span><br><span class="line">// 其中的 condition 参数，可以理解为一个条件标识，只有传入的 condition 和锁的标识相同才会加锁成功，否则阻塞线程。</span><br><span class="line"></span><br><span class="line">NSConditionLock *cLock = [[NSConditionLock alloc] initWithCondition:0];</span><br><span class="line"></span><br><span class="line">// 任务1</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    if ([cLock tryLockWhenCondition:0]) &#123;</span><br><span class="line">        NSLog(@&quot;加锁成功---任务1&quot;);</span><br><span class="line">       [cLock unlockWithCondition:1];</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        NSLog(@&quot;加锁失败---任务1&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 任务2</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    [cLock lockWhenCondition:3];</span><br><span class="line">    NSLog(@&quot;加锁成功---任务2&quot;);</span><br><span class="line">    [cLock unlockWithCondition:2];</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 任务3</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    [cLock lockWhenCondition:1];</span><br><span class="line">    NSLog(@&quot;加锁成功---任务3&quot;);</span><br><span class="line">    [cLock unlockWithCondition:3];</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">打印顺序: 任务1  任务3  任务2</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">我们在初始化 NSConditionLock 对象时，给了他的标示为 0</span><br><span class="line">执行 tryLockWhenCondition: 时，我们传入的条件标示也是 0，所以 任务1 加锁成功</span><br><span class="line">执行 unlockWithCondition: 时，这时候会把 condition 由 0 修改为 1</span><br><span class="line">接着会走到 任务3，然后 任务3 又将 condition 修改为 3，最后走 任务2 的流程</span><br><span class="line">从上面的结果我们可以发现，NSConditionLock 还可以实现任务之间的依赖。</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="5、NSRecursiveLock-递归锁"><a href="#5、NSRecursiveLock-递归锁" class="headerlink" title="5、NSRecursiveLock 递归锁"></a>5、NSRecursiveLock 递归锁</h4><p><strong>递归锁可以被同一个线程多次获取而不会导致死锁。但是所有其他线程都无法访问由锁保护的代码。</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">// 此处如果用 NSLock 会死锁</span><br><span class="line">// NSLock *rLock = [NSLock new];</span><br><span class="line"></span><br><span class="line">NSRecursiveLock *rLock = [NSRecursiveLock new];</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    static void (^RecursiveBlock)(NSInteger);</span><br><span class="line">    RecursiveBlock = ^(NSInteger value) &#123;</span><br><span class="line">        [rLock lock];</span><br><span class="line">        if (value &gt; 0) &#123;</span><br><span class="line">            NSLog(@&quot;线程%d&quot;, value);</span><br><span class="line">            RecursiveBlock(value - 1);</span><br><span class="line">        &#125;</span><br><span class="line">        [rLock unlock];</span><br><span class="line">    &#125;;</span><br><span class="line">    RecursiveBlock(4);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">死锁情况：</span><br><span class="line">如果用 NSLock，在线程中 RecursiveMethod 是递归调用，每次进入 block 时，都会加一次锁，</span><br><span class="line">而从第二次开始，由于锁已经被使用，所以它需要等待锁被解除，这就导致死锁，线程被阻塞。</span><br><span class="line">需要将 NSLock 替换为 NSRecursiveLock。</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="6、pthread-mutex-互斥锁"><a href="#6、pthread-mutex-互斥锁" class="headerlink" title="6、pthread_mutex 互斥锁"></a>6、pthread_mutex 互斥锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">// ==================================================================</span><br><span class="line"></span><br><span class="line">pthread_mutex_t _mutex;</span><br><span class="line">pthread_cond_t _cond;</span><br><span class="line"></span><br><span class="line">// 用法类似 NSCondition</span><br><span class="line">pthread_cond_broadcast(&amp;_cond);</span><br><span class="line">pthread_cond_signal(&amp;_cond);</span><br><span class="line">pthread_cond_wait(&amp;_cond, &amp;_mutex);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">// 普通锁</span><br><span class="line">pthread_mutex_init(&amp;_mutex, NULL));</span><br><span class="line"></span><br><span class="line">// 递归锁</span><br><span class="line">pthread_mutexattr_t attr;</span><br><span class="line">pthread_mutexattr_init (&amp;attr);</span><br><span class="line">pthread_mutexattr_settype (&amp;attr, PTHREAD_MUTEX_RECURSIVE);</span><br><span class="line">pthread_mutex_init (&amp;_mutex, &amp;attr);</span><br><span class="line">pthread_mutexattr_destroy (&amp;attr);</span><br><span class="line">   </span><br><span class="line">   </span><br><span class="line">   </span><br><span class="line">#define PTHREAD_MUTEX_NORMAL		0</span><br><span class="line">#define PTHREAD_MUTEX_ERRORCHECK	1</span><br><span class="line">#define PTHREAD_MUTEX_RECURSIVE		2</span><br><span class="line">#define PTHREAD_MUTEX_DEFAULT		PTHREAD_MUTEX_NORMAL</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">// 在 dealloc 方法中需要销毁</span><br><span class="line">pthread_mutex_destroy(&amp;_mutex)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// ==================================================================</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">static pthread_mutex_t pLock;</span><br><span class="line">pthread_mutex_init(&amp;pLock, NULL);</span><br><span class="line"></span><br><span class="line">// 任务1</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    NSLog(@&quot;任务1 准备上锁&quot;);</span><br><span class="line">    pthread_mutex_lock(&amp;pLock);</span><br><span class="line">    sleep(3);</span><br><span class="line">    NSLog(@&quot;任务1&quot;);</span><br><span class="line">    pthread_mutex_unlock(&amp;pLock);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 任务2</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    NSLog(@&quot;任务2 准备上锁&quot;);</span><br><span class="line">    pthread_mutex_lock(&amp;pLock);</span><br><span class="line">    NSLog(@&quot;任务2&quot;);</span><br><span class="line">    pthread_mutex_unlock(&amp;pLock);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// pthread_mutex 中有个 pthread_mutex_trylock(&amp;pLock) 和 OSSpinLockTry(&amp;oslock) 的</span><br><span class="line">// 区别在于，前者可以加锁时返回的是 0，否则返回一个错误提示码；后者返回的 YES 和 NO</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="7、信号量机制"><a href="#7、信号量机制" class="headerlink" title="7、信号量机制"></a>7、信号量机制</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">// 信号量机制</span><br><span class="line">// 初始化信号量，值要 &gt;= 0，如果 &lt; 0，则返回 NULL</span><br><span class="line">dispatch_semaphore_t semaphore = dispatch_semaphore_create(1);</span><br><span class="line"></span><br><span class="line">// 可以是具体的等待时间，或者 DISPATCH_TIME_FOREVER</span><br><span class="line">dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, 3.0f * NSEC_PER_SEC);</span><br><span class="line"></span><br><span class="line">// 线程1</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    NSLog(@&quot;线程1 等待ing&quot;);</span><br><span class="line">    </span><br><span class="line">    // 信号等待: 如果 semaphore = 0，则阻塞当前线程；在 &gt; 0 时 semaphore - 1 并返回</span><br><span class="line">    dispatch_semaphore_wait(semaphore, timeout);</span><br><span class="line">    </span><br><span class="line">    NSLog(@&quot;线程1 正在执行&quot;);</span><br><span class="line">    </span><br><span class="line">    // 信号通知: semaphore + 1 并返回</span><br><span class="line">    dispatch_semaphore_signal(semaphore);</span><br><span class="line">    NSLog(@&quot;线程1 发送信号&quot;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">// 线程2</span><br><span class="line">dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">    NSLog(@&quot;线程2 等待ing&quot;);</span><br><span class="line">    dispatch_semaphore_wait(semaphore, timeout);</span><br><span class="line">    NSLog(@&quot;线程2 正在执行 &quot;);</span><br><span class="line">    dispatch_semaphore_signal(semaphore);</span><br><span class="line">    NSLog(@&quot;线程2 发送信号&quot;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="8、pthread-rwlock-t-读写锁"><a href="#8、pthread-rwlock-t-读写锁" class="headerlink" title="8、pthread_rwlock_t 读写锁"></a>8、pthread_rwlock_t 读写锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">- (void)useRWLock</span><br><span class="line">&#123;</span><br><span class="line">    // pthread_rwlock_t 读写锁</span><br><span class="line">    // 当读写锁被一个线程以读模式占用时，写操作的其他线程会被阻塞，读操作的其他线程还可继续进行。</span><br><span class="line">    // 当读写锁被一个线程以写模式占用时，写操作的其他线程会被阻塞，读操作的其他线程也被阻塞。</span><br><span class="line">    </span><br><span class="line">    // 初始化</span><br><span class="line">    pthread_rwlock_t rwLock = PTHREAD_RWLOCK_INITIALIZER;</span><br><span class="line">    // 读模式</span><br><span class="line">    pthread_rwlock_wrlock(&amp;rwLock);</span><br><span class="line">    // 写模式</span><br><span class="line">    pthread_rwlock_rdlock(&amp;rwLock);</span><br><span class="line">    // 读模式或者写模式的解锁</span><br><span class="line">    pthread_rwlock_unlock(&amp;rwLock);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0, 0), ^&#123;</span><br><span class="line">        [self readBookWithTag:1];</span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0, 0), ^&#123;</span><br><span class="line">        [self readBookWithTag:2];</span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0, 0), ^&#123;</span><br><span class="line">        [self writeBook:3];</span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0, 0), ^&#123;</span><br><span class="line">        [self writeBook:4];</span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">    dispatch_async(dispatch_get_global_queue(0, 0), ^&#123;</span><br><span class="line">        [self readBookWithTag:5];</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)readBookWithTag:(NSInteger )tag &#123;</span><br><span class="line">    pthread_rwlock_rdlock(&amp;rwLock);</span><br><span class="line">    NSLog(@&quot;start read ---- %ld&quot;,tag);</span><br><span class="line">    </span><br><span class="line">    // 读...</span><br><span class="line">    </span><br><span class="line">    NSLog(@&quot;end   read ---- %ld&quot;,tag);</span><br><span class="line">    pthread_rwlock_unlock(&amp;rwLock);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (void)writeBook:(NSInteger)tag &#123;</span><br><span class="line">    pthread_rwlock_wrlock(&amp;rwLock);</span><br><span class="line">    NSLog(@&quot;start wirte ---- %ld&quot;,tag);</span><br><span class="line">    </span><br><span class="line">    // 写...</span><br><span class="line">    </span><br><span class="line">    NSLog(@&quot;end   wirte ---- %ld&quot;,tag);</span><br><span class="line">    pthread_rwlock_unlock(&amp;rwLock);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="8、os-unfair-lock-苹果官方建议的用来替代-OSSpinLock-的锁"><a href="#8、os-unfair-lock-苹果官方建议的用来替代-OSSpinLock-的锁" class="headerlink" title="8、os_unfair_lock 苹果官方建议的用来替代 OSSpinLock 的锁"></a>8、os_unfair_lock 苹果官方建议的用来替代 OSSpinLock 的锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 创建锁，并初始化</span><br><span class="line">os_unfair_lock_t unfairLock;</span><br><span class="line">unfairLock = &amp;(OS_UNFAIR_LOCK_INIT);</span><br><span class="line"></span><br><span class="line">// 加锁</span><br><span class="line">os_unfair_lock_lock(unfairLock);</span><br><span class="line"></span><br><span class="line">// 解锁</span><br><span class="line">os_unfair_lock_unlock(unfairLock);</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h4 id="9、OSSpinLock-自旋锁（性能最好，但某些场景会有问题，已经被苹果废弃）"><a href="#9、OSSpinLock-自旋锁（性能最好，但某些场景会有问题，已经被苹果废弃）" class="headerlink" title="9、OSSpinLock 自旋锁（性能最好，但某些场景会有问题，已经被苹果废弃）"></a>9、OSSpinLock 自旋锁（性能最好，但某些场景会有问题，已经被苹果废弃）</h4><ul>
+<li><strong>自旋锁的特点是当有其他线程加锁后，当前线程会循环等待，并不会进入睡眠，所以性能最好。</strong></li>
+<li><strong>若几个线程的优先级不同，则可能出现<a href="https://baike.baidu.com/item/%E4%BC%98%E5%85%88%E7%BA%A7%E7%BF%BB%E8%BD%AC/4945202?fr=aladdin" target="_blank" rel="noopener">优先级翻转</a>的问题。所以 OSSpinLock 已经被苹果废弃。</strong></li>
+<li><strong>除非开发者能保证访问锁的线程优先级都相同，否则 iOS 系统中所有类型的自旋锁都别再用。</strong></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">- (void)testOSSpinLock</span><br><span class="line">&#123;</span><br><span class="line">    // 主线程中</span><br><span class="line">    __block OSSpinLock spinlock = OS_SPINLOCK_INIT;</span><br><span class="line">    </span><br><span class="line">    // 任务1</span><br><span class="line">    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">        OSSpinLockLock(&amp;spinlock);</span><br><span class="line">        [self threadMethod1];</span><br><span class="line">        sleep(3);</span><br><span class="line">        OSSpinLockUnlock(&amp;spinlock);</span><br><span class="line">    &#125;);</span><br><span class="line">    </span><br><span class="line">    for (NSUInteger i = 0; i &lt; 10; i++) &#123;</span><br><span class="line">        // 任务2</span><br><span class="line">        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^&#123;</span><br><span class="line">            // 睡一秒，保证 任务1 先加锁</span><br><span class="line">            sleep(1);</span><br><span class="line">            </span><br><span class="line">            // 如果 任务1 加锁成功，则 任务2 的线程会循环等待，并不会进入睡眠，这是自旋锁的特点</span><br><span class="line">            OSSpinLockLock(&amp;spinlock);</span><br><span class="line">            [self threadMethod2];</span><br><span class="line">            OSSpinLockUnlock(&amp;spinlock);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><br><br><br><br><br><br><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/多线程/">多线程</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://cfap.github.io/2018/03/28/ThreadSafe/" data-title="线程安全中的各种锁 | 周二" data-tsina="undefined" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/04/09/7788/" title="一些零散的知识点">
+  <strong>上一篇：</strong><br/>
+  <span>
+  一些零散的知识点</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/03/28/GCD/"  title="多线程：GCD">
+ <strong>下一篇：</strong><br/> 
+ <span>多线程：GCD
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS（26）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/macOS/" title="macOS">macOS（1）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/爱好/" title="爱好">爱好（4）</a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/零散/" title="零散">零散<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/多线程/" title="多线程">多线程<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/网络/" title="网络">网络<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/数据存储/" title="数据存储">数据存储<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/block/" title="block">block<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/音视频/" title="音视频">音视频<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内存管理/" title="内存管理">内存管理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/算法/" title="算法">算法<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL-ES-2-0/" title="OpenGL ES 2.0">OpenGL ES 2.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/RunLoop/" title="RunLoop">RunLoop<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Runtime/" title="Runtime">Runtime<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+	<p class="copyright" style="margin-top: 10px;">
+	Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018
+	
+	<a href="/about" target="_blank" title="取名很蛋疼">取名很蛋疼</a>
+	
+
+	</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-28029597-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

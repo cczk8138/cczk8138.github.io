@@ -1,0 +1,589 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>iOS 静态库制作 | 周二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="取名很蛋疼">
+    
+
+    
+    <meta name="description" content="静态库和动态库的存在形式和区别静态库：  .a 和 .framework 会被完整地复制到每个调用它的程序中，被多个程序使用就有多份冗余拷贝  动态库：  .tbd（这是从 Xcode 7 开始的后缀名，Xcode 7 之前是 .dylib ） 和 .framework 在程序运行时由系统动态加载到内存中，系统只加载一份，多个程序共用，节省内存   CPU 指令集介绍arm 处理器arm处理器，">
+<meta name="keywords" content="零散">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 静态库制作">
+<meta property="og:url" content="https://cfap.github.io/2018/01/16/StaticLibrary/index.html">
+<meta property="og:site_name" content="周二">
+<meta property="og:description" content="静态库和动态库的存在形式和区别静态库：  .a 和 .framework 会被完整地复制到每个调用它的程序中，被多个程序使用就有多份冗余拷贝  动态库：  .tbd（这是从 Xcode 7 开始的后缀名，Xcode 7 之前是 .dylib ） 和 .framework 在程序运行时由系统动态加载到内存中，系统只加载一份，多个程序共用，节省内存   CPU 指令集介绍arm 处理器arm处理器，">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-04-10T09:10:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 静态库制作">
+<meta name="twitter:description" content="静态库和动态库的存在形式和区别静态库：  .a 和 .framework 会被完整地复制到每个调用它的程序中，被多个程序使用就有多份冗余拷贝  动态库：  .tbd（这是从 Xcode 7 开始的后缀名，Xcode 7 之前是 .dylib ） 和 .framework 在程序运行时由系统动态加载到内存中，系统只加载一份，多个程序共用，节省内存   CPU 指令集介绍arm 处理器arm处理器，">
+
+    
+    <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.png">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="周二">周二</a></h1>
+				<h2 class="blog-motto">不做评论</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:cfap.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2018/01/16/StaticLibrary/" title="iOS 静态库制作" itemprop="url">iOS 静态库制作</a>
+  </h1>
+  
+  <p class="article-time">
+    <time datetime="2018-01-16T09:03:25.000Z" itemprop="datePublished"> 发表于 2018-01-16 17:03:25</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		<p><br></p>
+<h1 id="静态库和动态库的存在形式和区别"><a href="#静态库和动态库的存在形式和区别" class="headerlink" title="静态库和动态库的存在形式和区别"></a>静态库和动态库的存在形式和区别</h1><p>静态库：</p>
+<ul>
+<li><code>.a</code> 和 <code>.framework</code></li>
+<li>会被完整地复制到每个调用它的程序中，被多个程序使用就有多份冗余拷贝</li>
+</ul>
+<p>动态库：</p>
+<ul>
+<li><code>.tbd</code>（这是从 Xcode 7 开始的后缀名，Xcode 7 之前是 <code>.dylib</code> ） 和 <code>.framework</code></li>
+<li>在程序运行时由系统动态加载到内存中，系统只加载一份，多个程序共用，节省内存</li>
+</ul>
+<p><br></p>
+<h1 id="CPU-指令集介绍"><a href="#CPU-指令集介绍" class="headerlink" title="CPU 指令集介绍"></a>CPU 指令集介绍</h1><h3 id="arm-处理器"><a href="#arm-处理器" class="headerlink" title="arm 处理器"></a>arm 处理器</h3><p>arm处理器，因为其低功耗和小尺寸而闻名，几乎所有的手机处理器都基于arm，其在嵌入式系统中的应用非常广泛，它的性能在同等功耗产品中也很出色。</p>
+<p><br></p>
+<h3 id="iPhone-、iPad-指令集"><a href="#iPhone-、iPad-指令集" class="headerlink" title="iPhone 、iPad 指令集"></a>iPhone 、iPad 指令集</h3><p>苹果A7处理器（A系列的第一代64位处理器）支持两个不同的指令集：32位ARM指令集（armv6｜armv7｜armv7s）和64位ARM指令集（arm64），i386｜x86_64 是PC处理器的指令集，i386是针对intel通用微处理器32架构的。x86_64是针对x86架构的64位处理器。当使用iOS模拟器的时候会用到 i386｜x86_64，iOS模拟器没有arm指令集，因为模拟器运行在Mac电脑上，使用的是Mac的CPU指令集。</p>
+<p><br></p>
+<p><code>armv7</code> / <code>armv7s</code> / <code>arm64</code> 都是 ARM 处理器的指令集，一般用于移动设备<br><code>i386</code> 是针对 intel 通用微处理器 <code>32</code> 位处理器<br><code>x86_64</code> 是针对 x86 架构的 <code>64</code> 位处理器，<code>兼容 32 位</code></p>
+<p>arm64 ：5S+<br>armv7s：5 ~ 5C<br>armv7 ：3GS ~ 4S <code>（静态库只要支持了armv7，就可以跑在armv7s的架构上）</code></p>
+<p>模拟器 32 位处理器测试需要 i386 架构，即 5S 之前的设备，不包含 5S<br>模拟器 64 位处理器测试需要 x86_64 架构，即 5S 之后的设备，包含 5S<br>真机 32 位处理器需要 armv7，或者 armv7s 架构，<br>真机 64 位处理器需要 arm64 架构。</p>
+<p><br></p>
+<h1 id="Xcode-中设置指令集"><a href="#Xcode-中设置指令集" class="headerlink" title="Xcode 中设置指令集"></a>Xcode 中设置指令集</h1><p>主要有以下三个：<code>Architectures</code>、<code>Valid Architectures</code>、<code>Build Active Architecture Only</code></p>
+<p><br></p>
+<h5 id="Architectures"><a href="#Architectures" class="headerlink" title="Architectures"></a>Architectures</h5><ul>
+<li>该编译选项指定了工程将被编译成支持哪些指令集，支持指令集是通过编译生成对应的二进制数据包实现的，如果支持的指令集数目有多个，就会编译出支持多个指令集代码的数据包，造成最终编译的包很大。</li>
+</ul>
+<p><br></p>
+<h5 id="Valid-Architectures"><a href="#Valid-Architectures" class="headerlink" title="Valid Architectures"></a>Valid Architectures</h5><ul>
+<li><p>该编译项指定可能支持的指令集，该列表和Architectures列表的<code>交集</code>，将是Xcode最终生成二进制包所支持的指令集。</p>
+</li>
+<li><p>比如，Valid Architectures设置的支持arm指令集版本有：armv7/armv7s/arm64，对应的Architectures设置的支持arm指令集版本有：armv7s，这时Xcode只会生成一个armv7s指令集的二进制包。</p>
+</li>
+<li><p>Valid Architectures 设置里， 默认为 Standard architectures(armv7,arm64),如果你想改的话，自己在other中更改</p>
+</li>
+</ul>
+<p><br></p>
+<h5 id="Build-Active-Architecture-Only"><a href="#Build-Active-Architecture-Only" class="headerlink" title="Build Active Architecture Only"></a>Build Active Architecture Only</h5><ul>
+<li><p>该编译项用于设置是否只编译当前使用的设备对应的arm指令集。</p>
+</li>
+<li><p>当该选项设置成YES时，你连上一个armv7指令集的设备，就算你的Valid Architectures和Architectures都设置成armv7/armv7s/arm64，还是依然只会生成一个armv7指令集的二进制包。</p>
+</li>
+<li><p>在不考虑编译效率的情况下，为了支持各种指令集，<code>建议把 Debug、Release 模式都设置为 NO</code>。</p>
+</li>
+</ul>
+<p><br></p>
+<h1 id="Xcode-中设置-Other-linker-flags-参数"><a href="#Xcode-中设置-Other-linker-flags-参数" class="headerlink" title="Xcode 中设置 Other linker flags 参数"></a>Xcode 中设置 Other linker flags 参数</h1><p><strong>当静态库使用了 Category 时，需要把 Other linker flags 参数设置为 <code>－ObjC</code></strong>，否则会报错</p>
+<p>有以下三个参数可选：</p>
+<ul>
+<li><p>－ObjC：加了这个参数后，链接器就会把静态库中所有的Objective-C类和分类都加载到最后的可执行文件中</p>
+</li>
+<li><p>－all_load：会让链接器把所有找到的目标文件都加载到可执行文件中，但是千万不要随便使用这个参数！假如你使用了不止一个静态库文件，然后又使用了这个参数，那么你很有可能会遇到ld: duplicate symbol错误，因为不同的库文件里面可能会有相同的目标文件，所以建议在遇到-ObjC失效的情况下使用-force_load参数。</p>
+</li>
+<li><p>-force_load：所做的事情跟-all_load其实是一样的，但是-force_load需要指定要进行全部加载的库文件的路径，这样的话，你就只是完全加载了一个库文件，不影响其余库文件的按需加载</p>
+</li>
+</ul>
+<p><br></p>
+<h1 id="以下使用-Xcode-9-2-来演示"><a href="#以下使用-Xcode-9-2-来演示" class="headerlink" title="以下使用 Xcode 9.2 来演示"></a>以下使用 Xcode 9.2 来演示</h1><p><br></p>
+<h4 id="创建-a静态库"><a href="#创建-a静态库" class="headerlink" title="创建.a静态库"></a>创建.a静态库</h4><p><code>command + shift + N</code> -&gt; <code>iOS</code> -&gt; <code>Framework &amp; Library</code> -&gt; <code>Cocoa Touch Static Library</code></p>
+<p><br></p>
+<h5 id="写完代码后"><a href="#写完代码后" class="headerlink" title="写完代码后"></a>写完代码后</h5><ol>
+<li><p>公开头文件</p>
+<ul>
+<li>点击 TARGETS 下的项目 -&gt; Copy Files，添加需要公开的头文件</li>
+</ul>
+</li>
+<li><p>设置Xcode</p>
+<ul>
+<li>设置 Build Active Architecture Only 下的Debug 和 Release 都为 NO</li>
+</ul>
+</li>
+<li><p>选择制作 Release 或 Debug 版本的库</p>
+<ul>
+<li>选择 项目 -&gt; Edit Scheme -&gt; Run -&gt; Info -&gt; Build Configuration，选择 Debug 或者 Release</li>
+</ul>
+</li>
+<li><p>打包库</p>
+<ul>
+<li>选择某个模拟器，编译运行，打出来的是支持模拟器指令集的 .a 静态库</li>
+<li>选择 Generic iOS Device，打出来的是支持真机使用的 .a 静态库</li>
+</ul>
+</li>
+<li><p>查看打包好的 .a 静态库</p>
+<ul>
+<li>在项目 -&gt; Products 目录下的 xxxx.a 文件点右键，Show in Finder 即可查看</li>
+</ul>
+</li>
+<li><p>使用</p>
+<ul>
+<li>把头文件和.a文件拖入新工程即可使用</li>
+</ul>
+</li>
+</ol>
+<p><br></p>
+<h4 id="创建-framework静态库"><a href="#创建-framework静态库" class="headerlink" title="创建.framework静态库"></a>创建.framework静态库</h4><p><code>command + shift + N</code> -&gt; <code>iOS</code> -&gt; <code>Framework &amp; Library</code> -&gt; <code>Cocoa Touch Framework</code></p>
+<p><br></p>
+<h5 id="写完代码后-1"><a href="#写完代码后-1" class="headerlink" title="写完代码后"></a>写完代码后</h5><ol>
+<li><p>公开头文件</p>
+<ul>
+<li>选择 TARGETS 下的项目 - Build Phases - Headers，把需要公开的头文件从 Project 拖入 Public 中</li>
+</ul>
+</li>
+<li><p>设置Xcode</p>
+<ul>
+<li>设置 Build Active Architecture Only 下的Debug 和 Release 都为 NO</li>
+<li>设置 Mach-O Type 选择 Static Library，否则打出来的 .framework 是动态库</li>
+</ul>
+</li>
+<li><p>选择制作 Release 或 Debug 版本的库</p>
+<ul>
+<li>点击 项目 -&gt; Edit Scheme -&gt; Run -&gt; Info -&gt; Build Configuration，选择 Debug 或者 Release</li>
+</ul>
+</li>
+<li><p>打包库</p>
+<ul>
+<li>选择某个模拟器，编译运行，打出来的是支持模拟器指令集的 .framework 静态库</li>
+<li>选择 Generic iOS Device，打出来的是支持真机使用的 .framework 静态库</li>
+</ul>
+</li>
+<li><p>查看打包好的 .framework 静态库</p>
+<ul>
+<li>在项目 -&gt; Products 目录下的 xxxx.framework 文件点右键，Show in Finder 即可查看</li>
+</ul>
+</li>
+<li><p>使用</p>
+<ul>
+<li>把头文件和.a文件拖入新工程即可使用</li>
+</ul>
+</li>
+</ol>
+<p><br></p>
+<h4 id="查看静态库所支持的指令集"><a href="#查看静态库所支持的指令集" class="headerlink" title="查看静态库所支持的指令集"></a>查看静态库所支持的指令集</h4><ul>
+<li>lipo -info xxxx.a   </li>
+<li>lipo -info xxxx.framework/xxxx</li>
+</ul>
+<p><br></p>
+<h4 id="合并真机和模拟器版本的静态库"><a href="#合并真机和模拟器版本的静态库" class="headerlink" title="合并真机和模拟器版本的静态库"></a>合并真机和模拟器版本的静态库</h4><h5 id="合并-a"><a href="#合并-a" class="headerlink" title="合并.a"></a>合并.a</h5><ul>
+<li><code>lipo -create Debug-iphoneos/xxxx.a Debug-iphonesimulator/xxxx.a -output xxxx.a</code></li>
+</ul>
+<p><br></p>
+<h5 id="合并-framework"><a href="#合并-framework" class="headerlink" title="合并.framework"></a>合并.framework</h5><ul>
+<li><code>lipo -create ../xxxx.framework/xxxx ../xxxx.framework/xxxx -output ../xxxx</code></li>
+<li>合并后用生成的 xxxx 文件替换模拟器或者真机的 xxxx.framework 内的同名文件，这样库就能在真机和模拟器上跑</li>
+</ul>
+<p><br></p>
+<h4 id="framework合并脚本："><a href="#framework合并脚本：" class="headerlink" title="framework合并脚本："></a>framework合并脚本：</h4><ol>
+<li>在 TARGETS -&gt; Build Phases 中点“+”加号，选择 New Run Script Phase，会添加一项 Run Script </li>
+<li><p>将下面的脚本代码粘贴至提示“Type a script or drag…”输入框内</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">if [ &quot;$&#123;ACTION&#125;&quot; = &quot;build&quot; ]</span><br><span class="line">then</span><br><span class="line">INSTALL_DIR=$&#123;SRCROOT&#125;/Products/$&#123;PROJECT_NAME&#125;.framework</span><br><span class="line">DEVICE_DIR=$&#123;BUILD_ROOT&#125;/$&#123;CONFIGURATION&#125;-iphoneos/$&#123;PROJECT_NAME&#125;.framework</span><br><span class="line">SIMULATOR_DIR=$&#123;BUILD_ROOT&#125;/$&#123;CONFIGURATION&#125;-iphonesimulator/$&#123;PROJECT_NAME&#125;.framework</span><br><span class="line">if [ -d &quot;$&#123;INSTALL_DIR&#125;&quot; ]</span><br><span class="line">then</span><br><span class="line">rm -rf &quot;$&#123;INSTALL_DIR&#125;&quot;</span><br><span class="line">fi</span><br><span class="line">mkdir -p &quot;$&#123;INSTALL_DIR&#125;&quot;</span><br><span class="line">cp -R &quot;$&#123;DEVICE_DIR&#125;/&quot; &quot;$&#123;INSTALL_DIR&#125;/&quot;</span><br><span class="line">#ditto &quot;$&#123;DEVICE_DIR&#125;/Headers&quot; &quot;$&#123;INSTALL_DIR&#125;/Headers&quot;</span><br><span class="line">lipo -create &quot;$&#123;DEVICE_DIR&#125;/$&#123;PROJECT_NAME&#125;&quot; &quot;$&#123;SIMULATOR_DIR&#125;/$&#123;PROJECT_NAME&#125;&quot; -output &quot;$&#123;INSTALL_DIR&#125;/$&#123;PROJECT_NAME&#125;&quot;</span><br><span class="line">open &quot;$&#123;DEVICE_DIR&#125;&quot;</span><br><span class="line">open &quot;$&#123;SRCROOT&#125;/Products&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>测试脚本，在 Debug 或 Release 环境下分别选择真机和模拟器运行，运行成功后会自动打开工程根目录下的 Products 目录，查看 framework 所支持的指令集</p>
+</li>
+</ol>
+<p><br></p>
+<h4 id="合并好坏："><a href="#合并好坏：" class="headerlink" title="合并好坏："></a>合并好坏：</h4><ul>
+<li>好：开发过程中更方便，真机和模拟器上都能运行调试</li>
+<li>坏：合并后静态库大小会变大，因此很多第三方的静态库是区分调试和发布版本的</li>
+</ul>
+<p><br></p>
+<h4 id="本文由以下几篇文章抄抄改改而来"><a href="#本文由以下几篇文章抄抄改改而来" class="headerlink" title="本文由以下几篇文章抄抄改改而来"></a>本文由以下几篇文章抄抄改改而来</h4><p><a href="https://www.jianshu.com/p/e263aec947ff" target="_blank" rel="noopener">SDK系列-iOS FrameWork制作概述</a><br><a href="https://www.jianshu.com/p/7a88c39f048a" target="_blank" rel="noopener">SDK系列-FrameWork的制作(1)</a><br><a href="https://www.jianshu.com/p/115ba9be4da1" target="_blank" rel="noopener">SDK系列-FrameWork制作(2)</a></p>
+<p><br><br><br><br><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/零散/">零散</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://cfap.github.io/2018/01/16/StaticLibrary/" data-title="iOS 静态库制作 | 周二" data-tsina="undefined" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2018/03/18/NSOperation & NSOperationQueue/" title="多线程：NSOperation、NSOperationQueue">
+  <strong>上一篇：</strong><br/>
+  <span>
+  多线程：NSOperation、NSOperationQueue</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/01/15/WKWebView/"  title="WKWebView 的简单使用">
+ <strong>下一篇：</strong><br/> 
+ <span>WKWebView 的简单使用
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS（26）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/macOS/" title="macOS">macOS（1）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/爱好/" title="爱好">爱好（4）</a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/零散/" title="零散">零散<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/多线程/" title="多线程">多线程<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/网络/" title="网络">网络<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/数据存储/" title="数据存储">数据存储<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/block/" title="block">block<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/音视频/" title="音视频">音视频<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内存管理/" title="内存管理">内存管理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/算法/" title="算法">算法<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL-ES-2-0/" title="OpenGL ES 2.0">OpenGL ES 2.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/RunLoop/" title="RunLoop">RunLoop<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Runtime/" title="Runtime">Runtime<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+	<p class="copyright" style="margin-top: 10px;">
+	Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2018
+	
+	<a href="/about" target="_blank" title="取名很蛋疼">取名很蛋疼</a>
+	
+
+	</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-28029597-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
