@@ -1,0 +1,462 @@
+
+ <!DOCTYPE HTML>
+<html >
+<head>
+  <meta charset="UTF-8">
+  
+    <title>CocoaPods 使用：创建本地库 | 周二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="取名很蛋疼">
+    
+
+    
+    <meta name="description" content="CocoaPods 使用：创建本地库 CocoaPods 管理代码的必要性项目到了一定规模, 代码组织和结构显得尤为重要。 重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。 分离代码, 常用的有几种方式：  放到不同的文件夹, 管理和组织代码。（源码可见） 打包成静态库 .a 或者 .framework 提供给项目使用。（只能调 AP">
+<meta name="keywords" content="多线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CocoaPods 使用：创建本地库">
+<meta property="og:url" content="https://cfap.github.io/2021/04/22/CocoaPods_Use_1/index.html">
+<meta property="og:site_name" content="周二">
+<meta property="og:description" content="CocoaPods 使用：创建本地库 CocoaPods 管理代码的必要性项目到了一定规模, 代码组织和结构显得尤为重要。 重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。 分离代码, 常用的有几种方式：  放到不同的文件夹, 管理和组织代码。（源码可见） 打包成静态库 .a 或者 .framework 提供给项目使用。（只能调 AP">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://cfap.github.io/2021/04/22/CocoaPods_Use_1/media/cocoapods_use_0.jpg">
+<meta property="og:image" content="https://cfap.github.io/2021/04/22/CocoaPods_Use_1/media/cocoapods_use_5.jpg">
+<meta property="og:image" content="https://cfap.github.io/2021/04/22/CocoaPods_Use_1/media/cocoapods_use_4.jpg">
+<meta property="og:updated_time" content="2021-04-22T09:07:52.560Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CocoaPods 使用：创建本地库">
+<meta name="twitter:description" content="CocoaPods 使用：创建本地库 CocoaPods 管理代码的必要性项目到了一定规模, 代码组织和结构显得尤为重要。 重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。 分离代码, 常用的有几种方式：  放到不同的文件夹, 管理和组织代码。（源码可见） 打包成静态库 .a 或者 .framework 提供给项目使用。（只能调 AP">
+<meta name="twitter:image" content="https://cfap.github.io/2021/04/22/CocoaPods_Use_1/media/cocoapods_use_0.jpg">
+
+    
+    <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.png">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="周二">周二</a></h1>
+				<h2 class="blog-motto">不做评论</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:cfap.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2021/04/22/CocoaPods_Use_1/" title="CocoaPods 使用：创建本地库" itemprop="url">CocoaPods 使用：创建本地库</a>
+  </h1>
+  
+  <p class="article-time">
+    <time datetime="2021-04-22T09:06:49.000Z" itemprop="datePublished"> 发表于 2021-04-22 17:06:49</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		<h1 id="CocoaPods-使用：创建本地库"><a href="#CocoaPods-使用：创建本地库" class="headerlink" title="CocoaPods 使用：创建本地库"></a>CocoaPods 使用：创建本地库</h1><p><br></p>
+<h2 id="CocoaPods-管理代码的必要性"><a href="#CocoaPods-管理代码的必要性" class="headerlink" title="CocoaPods 管理代码的必要性"></a>CocoaPods 管理代码的必要性</h2><p>项目到了一定规模, 代码组织和结构显得尤为重要。</p>
+<p>重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。</p>
+<p>分离代码, 常用的有几种方式：</p>
+<ol>
+<li>放到不同的文件夹, 管理和组织代码。（源码可见）</li>
+<li>打包成静态库 <code>.a</code> 或者 <code>.framework</code> 提供给项目使用。（只能调 API，看不到源码实现）</li>
+<li>使用工具管理，如 <code>CocoaPods</code>（统一管理，源码可见）</li>
+</ol>
+<p>这里介绍下使用 <code>CocoaPods</code> 来管理自己的本地代码。</p>
+<p><br></p>
+<h2 id="创建工程"><a href="#创建工程" class="headerlink" title="创建工程"></a>创建工程</h2><ol>
+<li>用 Xcode 创建一个测试工程 <code>TestPods</code></li>
+<li>在工程 <code>TestPods</code> 目录下面创建 <code>LocalLib</code> 目录，用来放置分离的代码，也可以将其放到其他目录。</li>
+<li>在 <code>LocalLib</code> 下面，pod 代码库名称为 <code>LibOne</code>，代码放在 <code>Codes</code> 目录下<br><img src="media/cocoapods_use_0.jpg" alt="cocoapods_use_0"><br><br><h2 id="创建-podspec-文件"><a href="#创建-podspec-文件" class="headerlink" title="创建 podspec 文件"></a>创建 podspec 文件</h2>在终端用命令行在 <code>LocalLib</code> 目录下面, 创建 podspec 文件</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">pod spec create LibOne</span><br><span class="line">``` </span><br><span class="line">创建完成后, 会生成 `LibOne.podspec` 文件。</span><br><span class="line"></span><br><span class="line">&lt;br&gt;</span><br><span class="line">## 修改 podspec 文件</span><br><span class="line">修改 `LibOne.podspec` 文件，主要修改几个关键地方：</span><br><span class="line"></span><br><span class="line">1. spec.description</span><br><span class="line">2. spec.license</span><br><span class="line">3. spec.source</span><br><span class="line">4. spec.source_files</span><br><span class="line">5. spec.exclude_files</span><br><span class="line">![cocoapods_use_1](media/cocoapods_use_1.jpg)</span><br><span class="line">![cocoapods_use_2](media/cocoapods_use_2.jpg)</span><br><span class="line">![cocoapods_use_3](media/cocoapods_use_3.jpg)</span><br><span class="line"></span><br><span class="line">配置好相关描述信息，不要包含 ‘Example’ 的字样，不然新版的 CocoaPods 执行 pod install 时候会报错误和警告。</span><br><span class="line"></span><br><span class="line">这样，工程就可以使用本地 pod 库了。</span><br><span class="line"></span><br><span class="line">## 工程使用本地 pod 库</span><br><span class="line">将 TestPods 改为 CocoaPods 项目.</span><br><span class="line"></span><br><span class="line">在 TestPods 目录，执行命令</span><br></pre></td></tr></table></figure>
+<p>pod init<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">会生成 Podfile 文件，修改 Podfile 文件</span><br></pre></td></tr></table></figure></p>
+<p>platform :ios, ‘14.4’</p>
+<h1 id="测试用-CocoaPods-制作本地库，此处定义的名称必须以小写字母开头？"><a href="#测试用-CocoaPods-制作本地库，此处定义的名称必须以小写字母开头？" class="headerlink" title="测试用 CocoaPods 制作本地库，此处定义的名称必须以小写字母开头？"></a>测试用 CocoaPods 制作本地库，此处定义的名称必须以小写字母开头？</h1><p>def localRepos</p>
+<h1 id="如果存放本地库的-LocalLib-文件夹是放在和-Podfile-文件同一层级的地方，以下写法都可以"><a href="#如果存放本地库的-LocalLib-文件夹是放在和-Podfile-文件同一层级的地方，以下写法都可以" class="headerlink" title="如果存放本地库的 LocalLib 文件夹是放在和 Podfile 文件同一层级的地方，以下写法都可以"></a>如果存放本地库的 LocalLib 文件夹是放在和 Podfile 文件同一层级的地方，以下写法都可以</h1><h1 id="pod-‘LibOne’-path-gt-‘LocalLib’"><a href="#pod-‘LibOne’-path-gt-‘LocalLib’" class="headerlink" title="pod ‘LibOne’, :path =&gt; ‘LocalLib’"></a>pod ‘LibOne’, :path =&gt; ‘LocalLib’</h1><h1 id="pod-‘LibOne’-path-gt-‘LocalLib-‘"><a href="#pod-‘LibOne’-path-gt-‘LocalLib-‘" class="headerlink" title="pod ‘LibOne’, :path =&gt; ‘LocalLib/‘"></a>pod ‘LibOne’, :path =&gt; ‘LocalLib/‘</h1><h1 id="pod-‘LibOne’-path-gt-‘-LocalLib’"><a href="#pod-‘LibOne’-path-gt-‘-LocalLib’" class="headerlink" title="pod ‘LibOne’, :path =&gt; ‘./LocalLib’"></a>pod ‘LibOne’, :path =&gt; ‘./LocalLib’</h1><p>  pod ‘LibOne’, :path =&gt; ‘./LocalLib/‘</p>
+<p>end</p>
+<p>target ‘TestPods’ do<br>  use_frameworks!</p>
+<p>  localRepos</p>
+<p>end<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">关键是指明 pod 库的位置，路径一定要正确，否则无法找到该库。</span><br><span class="line"></span><br><span class="line">在 TestPods 目录，执行命令，即可安装 pod 本地库。</span><br></pre></td></tr></table></figure></p>
+<p>pod install<br><code>`</code><br><img src="media/cocoapods_use_5.jpg" alt="cocoapods_use_5"></p>
+<p>如果报错，一般都是 pod 库的配置文件(.podspec)里面写的不符合要求。根据报错信息，加以修改即可。</p>
+<p>Xcode 打开工程<br><img src="media/cocoapods_use_4.jpg" alt="cocoapods_use_4"></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/多线程/">多线程</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://cfap.github.io/2021/04/22/CocoaPods_Use_1/" data-title="CocoaPods 使用：创建本地库 | 周二" data-tsina="undefined" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/9999/12/30/iOS-0/" title="iOS开篇">
+  <strong>上一篇：</strong><br/>
+  <span>
+  iOS开篇</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2018/07/18/SyncingData&Migration/"  title="数据同步、迁移">
+ <strong>下一篇：</strong><br/> 
+ <span>数据同步、迁移
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS（27）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/macOS/" title="macOS">macOS（1）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/爱好/" title="爱好">爱好（4）</a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/零散/" title="零散">零散<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/多线程/" title="多线程">多线程<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/网络/" title="网络">网络<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/数据存储/" title="数据存储">数据存储<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/算法/" title="算法">算法<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/音视频/" title="音视频">音视频<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/block/" title="block">block<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内存管理/" title="内存管理">内存管理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL-ES-2-0/" title="OpenGL ES 2.0">OpenGL ES 2.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/RunLoop/" title="RunLoop">RunLoop<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Runtime/" title="Runtime">Runtime<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+	<p class="copyright" style="margin-top: 10px;">
+	Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2021
+	
+	<a href="/about" target="_blank" title="取名很蛋疼">取名很蛋疼</a>
+	
+
+	</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-28029597-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
