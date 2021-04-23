@@ -1,0 +1,479 @@
+
+ <!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  
+    <title>CocoaPods 使用：创建公开的 pod 库 | 周二</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="取名很蛋疼">
+    
+
+    
+    <meta name="description" content="准备工作在创建公开的 pod 库之前，请确保已经有了 github 账号。此篇文章给介绍如何将代码开源并放到 pod 库中，供别人使用，这种方式属于打造公共（Public repo）仓库，任何人都可以搜索到你贡献的库并使用.  创建 Repository 并完善项目 在 Github 上创建一个 Repository，名为 SSSYPerson。 将该代码仓库 clone 到本地。 编写测试代码">
+<meta name="keywords" content="CocoaPods">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CocoaPods 使用：创建公开的 pod 库">
+<meta property="og:url" content="https://cfap.github.io/2021/04/22/CocoaPods_Use_2/index.html">
+<meta property="og:site_name" content="周二">
+<meta property="og:description" content="准备工作在创建公开的 pod 库之前，请确保已经有了 github 账号。此篇文章给介绍如何将代码开源并放到 pod 库中，供别人使用，这种方式属于打造公共（Public repo）仓库，任何人都可以搜索到你贡献的库并使用.  创建 Repository 并完善项目 在 Github 上创建一个 Repository，名为 SSSYPerson。 将该代码仓库 clone 到本地。 编写测试代码">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_6.jpg">
+<meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_7.jpg">
+<meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_8.jpg">
+<meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_9.jpg">
+<meta property="og:updated_time" content="2021-04-23T07:23:31.969Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CocoaPods 使用：创建公开的 pod 库">
+<meta name="twitter:description" content="准备工作在创建公开的 pod 库之前，请确保已经有了 github 账号。此篇文章给介绍如何将代码开源并放到 pod 库中，供别人使用，这种方式属于打造公共（Public repo）仓库，任何人都可以搜索到你贡献的库并使用.  创建 Repository 并完善项目 在 Github 上创建一个 Repository，名为 SSSYPerson。 将该代码仓库 clone 到本地。 编写测试代码">
+<meta name="twitter:image" content="https://cfap.github.io/media/cocoapods_use_6.jpg">
+
+    
+    <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.png">
+    
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="周二">周二</a></h1>
+				<h2 class="blog-motto">不做评论</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜单">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">首页</a></li>
+					
+						<li><a href="/archives">归档</a></li>
+					
+						<li><a href="/about">关于</a></li>
+					
+					<li>
+ 					
+					<form class="search" action="//google.com/search" method="get" accept-charset="utf-8">
+						<label>Search</label>
+						<input type="search" id="search" name="q" autocomplete="off" maxlength="20" placeholder="搜索" />
+						<input type="hidden" name="q" value="site:cfap.github.io">
+					</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2021/04/22/CocoaPods_Use_2/" title="CocoaPods 使用：创建公开的 pod 库" itemprop="url">CocoaPods 使用：创建公开的 pod 库</a>
+  </h1>
+  
+  <p class="article-time">
+    <time datetime="2021-04-22T12:56:40.000Z" itemprop="datePublished"> 发表于 2021-04-22 20:56:40</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		<p><br></p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>在创建公开的 pod 库之前，请确保已经有了 github 账号。此篇文章给介绍如何将代码开源并放到 pod 库中，供别人使用，这种方式属于打造公共（Public repo）仓库，任何人都可以搜索到你贡献的库并使用.</p>
+<p><br></p>
+<h2 id="创建-Repository-并完善项目"><a href="#创建-Repository-并完善项目" class="headerlink" title="创建 Repository 并完善项目"></a>创建 Repository 并完善项目</h2><ol>
+<li>在 Github 上创建一个 Repository，名为 SSSYPerson。</li>
+<li>将该代码仓库 clone 到本地。</li>
+<li>编写测试代码，这里只写了 SSSYPerson.h 和 .m 文件。</li>
+<li>执行命令 <code>pod spec create SSSYPerson</code>，创建 <code>SSSYPerson.podspec</code> 代码库描述文件。</li>
+<li>按照文件规范和实际情况修改 <code>SSSYPerson.podspec</code> 文件，或者在 Github 上面找一个开源项目参考即可。</li>
+<li>注意：<code>每次更新 pod 库的版本，都要修改 SSSYPerson.podspec 文件里的版本号</code></li>
+</ol>
+<p><img src="/media/cocoapods_use_6.jpg" alt="cocoapods_use_6"></p>
+<p>最终修改完如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Pod::Spec.new do |spec|</span><br><span class="line">  spec.name         = &quot;SSSYPerson&quot;</span><br><span class="line">  spec.version      = &quot;0.0.1&quot;</span><br><span class="line">  spec.summary      = &quot;Test CocoaPods.&quot;</span><br><span class="line">  spec.description  = &lt;&lt;-DESC</span><br><span class="line">  测试使用 CocoaPods 创建公开库</span><br><span class="line">                   DESC</span><br><span class="line"></span><br><span class="line">  spec.homepage     = &quot;https://github.com/cfap/SSSYPerson&quot;</span><br><span class="line">  spec.license      = &quot;MIT&quot;</span><br><span class="line">  spec.author             = &#123; &quot;&quot; =&gt; &quot;&quot; &#125;</span><br><span class="line">  spec.platform     = :ios, &quot;10.0&quot;</span><br><span class="line">  spec.source       = &#123; :git =&gt; &quot;https://github.com/cfap/SSSYPerson.git&quot;, :tag =&gt; spec.version &#125;</span><br><span class="line">  spec.source_files  = &quot;Classes&quot;, &quot;Classes/**/*.&#123;h,m&#125;&quot;</span><br><span class="line">  spec.exclude_files = &quot;Classes/Exclude&quot;</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h2 id="检测项目和文件配置的合法性"><a href="#检测项目和文件配置的合法性" class="headerlink" title="检测项目和文件配置的合法性"></a>检测项目和文件配置的合法性</h2><p>检查该 podspec 文件，执行下面命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod lib lint SSSYPerson.podspec</span><br></pre></td></tr></table></figure></p>
+<p>–verbose 可以输出更加详细的内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod lib lint SSSYPerson.podspec --verbose</span><br></pre></td></tr></table></figure>
+<p><code>pod lib lint *.podspec</code> 是只从本地验证你的 pod 能否通过验证。</p>
+<p><code>pod spec lint *.podspec</code> 是从本地和远程验证你的 pod 能否通过验证。</p>
+<p>如果正确，可以看到下图所示内容：<br><img src="/media/cocoapods_use_7.jpg" alt="cocoapods_use_7"></p>
+<p><br></p>
+<h2 id="添加项目到-Github-Repository"><a href="#添加项目到-Github-Repository" class="headerlink" title="添加项目到 Github Repository"></a>添加项目到 Github Repository</h2><p>将本地代码 push 到 Github 上的 SSSYPerson 仓库<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git add .</span><br><span class="line">git commit -m &quot;Init&quot;</span><br><span class="line">git push</span><br></pre></td></tr></table></figure></p>
+<p>给仓库打一个 Tag，即版本号，这里第一个版本就用 <code>0.0.1</code>，和 <code>SSSYPerson.podspec</code> 文件里设置的一样，如图所示:<br><img src="/media/cocoapods_use_8.jpg" alt="cocoapods_use_8"></p>
+<h2 id="将代码库推送到-CocoaPods"><a href="#将代码库推送到-CocoaPods" class="headerlink" title="将代码库推送到 CocoaPods"></a>将代码库推送到 CocoaPods</h2><ol>
+<li>注册 trunk，格式为 <code>pod trunk register 你的邮箱 ‘用户名’ –description=’简单描述’</code>，示例:<code>pod trunk register xxxxx@gmail.com &#39;TestName&#39; --description=&#39;test test&#39;</code></li>
+<li>打开邮箱，点击邮件里的激活链接</li>
+<li>激活成功后，检查注册信息，执行命令如下：<code>pod trunk me</code></li>
+<li>把代码库添加到 CocoaPods，执行命令 <code>pod trunk push SSSYPerson.podspec</code></li>
+</ol>
+<p>成功的效果图:<br><img src="/media/cocoapods_use_9.jpg" alt="cocoapods_use_9"></p>
+<h2 id="验证使用"><a href="#验证使用" class="headerlink" title="验证使用"></a>验证使用</h2><p>检查是否可以搜索到<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod search SSSYPerson</span><br></pre></td></tr></table></figure></p>
+<p><br><br>如果搜索不到，就先删除索引缓存，再搜索</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rm ~/Library/Caches/CocoaPods/search_index.json</span><br><span class="line">pod setup</span><br><span class="line">pod search SSSYPerson</span><br></pre></td></tr></table></figure>
+<p><br><br>在项目中可以使用该 pod 代码库，先修改 <code>Podfile</code> 文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod &apos;SSSYPerson&apos;, &apos;~&gt; 0.0.1&apos;</span><br></pre></td></tr></table></figure>
+<p>然后在你的测试项目中，执行 <code>pod install</code> 即可。</p>
+<p><br></p>
+<h2 id="关于-Tag"><a href="#关于-Tag" class="headerlink" title="关于 Tag"></a>关于 Tag</h2><p>有时候 tag 打错了并已提交，需要先删除本地 tag，再删远程 tag，然后再添加 tag<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git tag -d 0.0.1 // 先删除本地 tag</span><br><span class="line">git push origin --delete tag 0.0.1  // 再删除远程 tag，然后重新打 tag</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/iOS/">iOS</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/CocoaPods/">CocoaPods</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="https://cfap.github.io/2021/04/22/CocoaPods_Use_2/" data-title="CocoaPods 使用：创建公开的 pod 库 | 周二" data-tsina="undefined" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2021/04/23/CocoaPods_Use_3/" title="CocoaPods 使用：创建私有 pod 库">
+  <strong>上一篇：</strong><br/>
+  <span>
+  CocoaPods 使用：创建私有 pod 库</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2021/04/22/CocoaPods_Use_1/"  title="CocoaPods 使用：创建本地 pod 库">
+ <strong>下一篇：</strong><br/> 
+ <span>CocoaPods 使用：创建本地 pod 库
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分类</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/iOS/" title="iOS">iOS（29）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/macOS/" title="macOS">macOS（1）</a></li>
+		  
+		
+		  
+			<li><a href="/categories/爱好/" title="爱好">爱好（4）</a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/零散/" title="零散">零散<sup>6</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/多线程/" title="多线程">多线程<sup>5</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/UI/" title="UI">UI<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/CocoaPods/" title="CocoaPods">CocoaPods<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/网络/" title="网络">网络<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/数据存储/" title="数据存储">数据存储<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/算法/" title="算法">算法<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/音视频/" title="音视频">音视频<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/block/" title="block">block<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/内存管理/" title="内存管理">内存管理<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/OpenGL-ES-2-0/" title="OpenGL ES 2.0">OpenGL ES 2.0<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/RunLoop/" title="RunLoop">RunLoop<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/Runtime/" title="Runtime">Runtime<sup>1</sup></a></li>
+			
+		
+		</ul>
+</div>
+
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	</div>
+			
+		
+
+	<p class="copyright" style="margin-top: 10px;">
+	Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2021
+	
+	<a href="/about" target="_blank" title="取名很蛋疼">取名很蛋疼</a>
+	
+
+	</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Analytics Begin -->
+
+<script type="text/javascript">
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-28029597-1', 'null');  
+ga('send', 'pageview');
+</script>
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
