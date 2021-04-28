@@ -11,25 +11,27 @@
     
 
     
-    <meta name="description" content="使用 CocoaPods 管理代码的必要性项目到了一定规模, 代码组织和结构显得尤为重要。 重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。 分离代码, 常用的有几种方式：  放到不同的文件夹, 管理和组织代码。（源码可见） 打包成静态库 .a 或者 .framework 提供给项目使用。（只能调 API，看不到源码实现） 使用工具">
+    <meta name="description" content="使用场景有些项目或公司内，不希望把一些核心的公用代码开源，但是这些代码基本很稳定很成熟，可以做成组件给到其他人或者组内使用。就可以使用 Cocoapods 来创建自己的私有仓库，让大家共享代码，也是组件化的一种方案。 由于现实原因，国内访问 Github 和 CocoaPods 网站比较蛋疼，这里就用国内的 gitee 来做自私有库，效果和放在 Github 上一样，速度还快。如果放在 Gith">
 <meta name="keywords" content="CocoaPods">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CocoaPods 使用：创建私有 pod 库">
 <meta property="og:url" content="https://cfap.github.io/2021/04/23/CocoaPods_Use_3/index.html">
 <meta property="og:site_name" content="周二">
-<meta property="og:description" content="使用 CocoaPods 管理代码的必要性项目到了一定规模, 代码组织和结构显得尤为重要。 重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。 分离代码, 常用的有几种方式：  放到不同的文件夹, 管理和组织代码。（源码可见） 打包成静态库 .a 或者 .framework 提供给项目使用。（只能调 API，看不到源码实现） 使用工具">
+<meta property="og:description" content="使用场景有些项目或公司内，不希望把一些核心的公用代码开源，但是这些代码基本很稳定很成熟，可以做成组件给到其他人或者组内使用。就可以使用 Cocoapods 来创建自己的私有仓库，让大家共享代码，也是组件化的一种方案。 由于现实原因，国内访问 Github 和 CocoaPods 网站比较蛋疼，这里就用国内的 gitee 来做自私有库，效果和放在 Github 上一样，速度还快。如果放在 Gith">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_15.jpg">
+<meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_13.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_0.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_1.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_2.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_3.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_4.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_5.jpg">
-<meta property="og:updated_time" content="2021-04-22T11:24:59.628Z">
+<meta property="og:updated_time" content="2021-04-28T03:28:28.816Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CocoaPods 使用：创建私有 pod 库">
-<meta name="twitter:description" content="使用 CocoaPods 管理代码的必要性项目到了一定规模, 代码组织和结构显得尤为重要。 重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。 分离代码, 常用的有几种方式：  放到不同的文件夹, 管理和组织代码。（源码可见） 打包成静态库 .a 或者 .framework 提供给项目使用。（只能调 API，看不到源码实现） 使用工具">
-<meta name="twitter:image" content="https://cfap.github.io/media/cocoapods_use_0.jpg">
+<meta name="twitter:description" content="使用场景有些项目或公司内，不希望把一些核心的公用代码开源，但是这些代码基本很稳定很成熟，可以做成组件给到其他人或者组内使用。就可以使用 Cocoapods 来创建自己的私有仓库，让大家共享代码，也是组件化的一种方案。 由于现实原因，国内访问 Github 和 CocoaPods 网站比较蛋疼，这里就用国内的 gitee 来做自私有库，效果和放在 Github 上一样，速度还快。如果放在 Gith">
+<meta name="twitter:image" content="https://cfap.github.io/media/cocoapods_use_15.jpg">
 
     
     <link rel="alternative" href="/atom.xml" title="周二" type="application/atom+xml">
@@ -92,6 +94,248 @@
 </header>
 	<div class="article-content">
 		<p><br></p>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><p>有些项目或公司内，不希望把一些核心的公用代码开源，但是这些代码基本很稳定很成熟，可以做成组件给到其他人或者组内使用。就可以使用 Cocoapods 来创建自己的私有仓库，让大家共享代码，也是组件化的一种方案。</p>
+<p>由于现实原因，国内访问 Github 和 CocoaPods 网站比较蛋疼，这里就用国内的 gitee 来做自私有库，效果和放在 Github 上一样，速度还快。如果放在 Github 上，操作方式一样。</p>
+<p>以下就讲述如何创建自己的私有仓库以及如何使用私有仓库。</p>
+<p><br></p>
+<h2 id="创建仓库"><a href="#创建仓库" class="headerlink" title="创建仓库"></a>创建仓库</h2><p>我们需要两个仓库，一个是代码仓库，另一个是 pod 源的仓库。我们在 Podfile 文件里，如果没写明 pod 源地址，默认就是 <code>https://github.com/CocoaPods/Specs.git</code>，当我们使用了私有库时，就需要指明私有库的具体源地址，如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">source   &apos;https://github.com/CocoaPods/Specs.git&apos; # 公有库源地址</span><br><span class="line">source   &apos;https://gitee.com/extras/Specs.git&apos;     # 私有库源地址</span><br><span class="line"></span><br><span class="line">use_frameworks!</span><br><span class="line"></span><br><span class="line">platform :ios, &apos;9.0&apos;</span><br><span class="line"></span><br><span class="line">target &apos;SSSKit_Example&apos; do</span><br><span class="line">    pod &apos;SSSKit&apos;</span><br><span class="line">    pod &apos;AFNetworking&apos;</span><br><span class="line">end</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<h3 id="创建私有-pod-源仓库"><a href="#创建私有-pod-源仓库" class="headerlink" title="创建私有 pod 源仓库"></a>创建私有 pod 源仓库</h3><p>在码云（<a href="https://gitee.com）上创建私有" target="_blank" rel="noopener">https://gitee.com）上创建私有</a> pod 源仓库，用来存放私有代码库的详细描述信息 .podspec 文件，这里我已经创建好，所以提示已存在，如下图：<br><img src="/media/cocoapods_use_15.jpg" alt="cocoapods_use_15"></p>
+<p>用 <code>pod repo</code> 查看当前本地已存在的索引库<br><img src="/media/cocoapods_use_13.jpg" alt="cocoapods_use_13"></p>
+<p>创建本地的私有索引库文件夹，并与远程私有索引库进行关联<br>     3.2 添加本地私有索引库并与远程私有库</p>
+<pre><code>      $ pod repo add Specs https://gitee.com/extrass/Specs.git
+
+3.3 再次查看本地已存在的索引库
+</code></pre><ol start="4">
+<li>在代码托管平台码云（<a href="https://gitee.com）创建一个用来存放项目基础组件的仓库WTYLogDebugKit" target="_blank" rel="noopener">https://gitee.com）创建一个用来存放项目基础组件的仓库WTYLogDebugKit</a> </li>
+</ol>
+<ol start="5">
+<li><p>快速创建模板测试工程 </p>
+<p>   5.1 快速创建模板测试工程 在指定路径下</p>
+<pre><code>$ cd /Users/XXX/Documents/OC-PrivatePods
+
+$ pod lib create WTYLogDebugKit 
+</code></pre></li>
+</ol>
+<pre><code>5.2 填写以上信息后Xcode会自动打开测试工程，在测试模板工程文件夹下，我们可以看到如下：     
+
+
+
+5.3 删除Replace.m文件，新建WTYLogDebugKit(.h .m)文件，再回到Example路径下，重新执行pod install操作
+
+
+
+     $ cd /Users/XXX/Documents/OC-PrivatePods/WTYLogDebugKit/Example 
+
+     $ pod install
+
+     我们可以在模板测试工程中进行修改和操作！
+</code></pre><ol start="6">
+<li><p>将上面的模板测试工程，提交到第4步创建的远程代码仓库</p>
+<pre><code>$ cd /Users/XXX/Documents/OC-PrivatePods/WTYLogDebugKit
+
+$ git status
+
+$ git add .
+
+$ git commit -m&apos;基础组件测试工程&apos;
+
+ 编辑WTYLogDebugKit 模版工程的WTYLogDebugKit.podspec文件
+</code></pre></li>
+</ol>
+<pre><code>  $ pod lib lint （验证上一步编辑的 WTYLogDebugKit.podspec文件）
+
+  如果有ERROR，则需要去一个个修改完成，例如某个文件没有正确的引入依赖库等都会造成ERROR，解决好所  
+
+  有的ERROR后，验证结果如下：
+
+
+
+  这是一个警告，目前也并没有找到合适的解决办法，我们添加 --allow-warnings进行忽略
+
+ $ pod lib lint --allow-warnings
+
+ WTYLogDebugKit passed validation.
+
+ 表明验证通过
+
+ $ git status
+
+ $ git add .
+
+ $ git commit -m &apos;编辑spec文件&apos;
+
+ $ git remote add origin https://gitee.com/wty2009/WTYLogDebugKit.git (将本地库与远程代码仓库进行关联)
+
+ $ git push origin master  (提交到远程仓库)
+
+  如里有报错误：
+
+
+
+ 可以输入：git push -f  或 git pull origin master --allow-unrelated-histories  //把远程仓库和本地同步，消除差异
+
+$ git tag &apos;0.1.0&apos; (要与WTYLogDebugKit.podspec文件中的tag值保持一致)
+
+$ git push --tags(将tag提交到远程)
+
+$ pod spec lint --allow-warnings（验证远程是否正确，注意：Username与Password一定要填写正确）
+
+ WTYLogDebugKit.podspec passed validation.    
+
+ 表明验证通过
+</code></pre><ol start="7">
+<li><p>将podspec文件提交到本地的私有索引库</p>
+<p>   $ pod repo</p>
+</li>
+</ol>
+<pre><code>$ pod repo push WTYProjectSpec WTYLogDebugKit.podspec
+
+注意：提交后，依然会验证 podspec文件，验证通过后 会自动上传到在远程spec索引库,不信的话你可以看看在第二步创建的
+
+Spec远程私有索引库，是不是多了一个 WTYLogDebugKit/0.1.0文件！
+</code></pre><ol start="8">
+<li><p>添加及修改基础组件内容</p>
+<pre><code>$ cd /Users/XXX/Documents/OC-PrivatePods/WTYLogDebugKit
+
+编辑WTYLogDebugKit 模版工程的WTYLogDebugKit.podspec文件 
+</code></pre></li>
+</ol>
+<pre><code>$ git status
+
+$ git add .
+
+$ git commit -m&apos;新增Base，Tool文件内容&apos;
+
+$ git push origin master (提交到远程)
+
+$ git tag &apos;0.1.1&apos;
+
+$ git push --tags
+
+$ pod repo push WTYProjectSpec WTYLogDebugKit.podspec
+</code></pre><ol start="9">
+<li><p>在基础组件WTYLogDebugKit内部生成子库</p>
+<p>   问题描述：当我们执行完第8步后，我们发现主工程的Pods中并没有按文件夹（Log，Performance）进行不同类的划分，同</p>
+<p>   时当我们仅仅想引入一个Log库时，连同Performance也引入进项目中，冗余代码量增加！</p>
+<p>   修改WTYLogDebugKit.podspec文件 </p>
+</li>
+</ol>
+<pre><code>$ cd /Users/XXX/Documents/OC-PrivatePods/WTYLogDebugKit
+
+$ git status
+
+$ git add .
+
+$ git commit -m&apos;生成子库文件夹&apos;
+
+$ git push origin master (提交到远程)
+
+$ git tag &apos;0.1.3&apos;
+
+$ git push --tags
+
+$ pod repo push WTYProjectSpec WTYLogDebugKit.podspec
+
+$ pod search WTYLogDebugKit
+
+
+
+至此生成子库
+</code></pre><ol start="10">
+<li><p>主工程利用Pods使用生成的私有框架</p>
+<pre><code>用Xcode打开主工程编辑Podfile文件 
+</code></pre></li>
+</ol>
+<pre><code>$ pod install
+
+打开WTYLogDebugKit.xcworkspace，此时在pod中可以找到远程私有库的代码
+</code></pre><p>————————————————<br>版权声明：本文为CSDN博主「北斗定位」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>原文链接：<a href="https://blog.csdn.net/u012475191/article/details/89329594" target="_blank" rel="noopener">https://blog.csdn.net/u012475191/article/details/89329594</a></p>
+<p>OS_private_lib 的 repository，这个主要用来存放我们的代码。</p>
+<p>同样道理，创建一个 Repo 用于存放私有的 SpecRepo 源，我创建的是 <a href="https://github.com/veryitman/private_spec_repo.git" target="_blank" rel="noopener">https://github.com/veryitman/private_spec_repo.git</a> 这个仓库。</p>
+<p>为了说明问题，这里我使用了 Public 来模拟 Private 仓库。在实际开发中，一般都是使用公司自己搭建的私有 git 服务器来做，我这里主要是为了说明问题。</p>
+<p>创建代码工程</p>
+<ol>
+<li>先 clone 刚才创建的 repo 到本地</li>
+</ol>
+<p>1<br>2<br>3<br>cd ~/workspace/<br>git clone <a href="https://github.com/veryitman/iOS_private_lib" target="_blank" rel="noopener">https://github.com/veryitman/iOS_private_lib</a></p>
+<ol start="2">
+<li>创建工程</li>
+</ol>
+<p>在 ~/workspace/iOS_private_lib 下使用 pod lib create 创建工程，工程名字为 CoreHTTP，执行命令如下：</p>
+<p>1<br>2<br>3<br>cd ~/workspace/iOS_private_lib<br>pod lib create CoreHTTP<br>根据提示输入对应的信息即可完成创建，如图：<br>1</p>
+<p>创建成功后，包含一个 Example 例子工程，工程目录如下：<br>1</p>
+<p>使用 Xcode 打开例子工程，在 CoreHTTP/Classes 中创建文件即可，如下图所示：<br>1</p>
+<ol start="3">
+<li>编辑 podspec 文件</li>
+</ol>
+<p>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>Pod::Spec.new do |s|<br>  s.name             = ‘CoreHTTP’<br>  s.version          = ‘0.1.0’<br>  s.summary          = ‘CoreHTTP for create private pod, it is a demo only.’<br>  s.description      = &lt;<-desc the project of corehttp is a private pod, it demo only. desc s.homepage="https://github.com/veryitman/iOS_private_lib.git" s.license="{" :type> ‘MIT’, :file =&gt; ‘LICENSE’ }<br>  s.author           = { <a href="mailto:&#39;veryitman@126.com" target="_blank" rel="noopener">&#39;veryitman@126.com</a>‘ =&gt; <a href="mailto:&#39;veryitman@126.com" target="_blank" rel="noopener">&#39;veryitman@126.com</a>‘ }<br>  s.platform         = :ios, “7.0”<br>  s.source           = { :git =&gt; ‘<a href="https://github.com/veryitman/iOS_private_lib.git&#39;" target="_blank" rel="noopener">https://github.com/veryitman/iOS_private_lib.git&#39;</a>, :tag =&gt; s.version.to_s }<br>  s.ios.deployment_target = ‘8.0’<br>  s.source_files = ‘CoreHTTP/Classes/*<em>/</em>‘<br>  s.requires_arc = true<br>end<br>这里需要注意，如果 s.source_files 写的不对，会报下面的错误。</-desc></p>
+<p>1</p>
+<ul>
+<li>ERROR | [iOS] file patterns: The <code>source_files</code> pattern did not match any file.<br>CoreHTTP 的名字必须是你代码存放的文件夹名，而且这个文件件要与 podspec 文件在同一级文件目录下，从上面截图的目录结构可以看出。</li>
+</ul>
+<p>另外一个提示的错误点，可能是因为空目录的问题造成的，如果这样的话，可以在各个文件夹下面创建 .gitkeep 文件，该文件的作用是为了提交空文件夹，因为 git 默认是不会添加空文件夹到仓库的。</p>
+<p>创建 .gitkeep 文件的命令如下：</p>
+<p>1<br>2<br>3<br>cd 文件夹下<br>touch .gitkeep<br>这里我折腾了蛮久，最后思考和参考了自己之前的开源项目管理博客，才解决这个问题。</p>
+<ol start="4">
+<li>检查和验证本地 podspec 文件</li>
+</ol>
+<p>1<br>2<br>3<br>cd CoreHTTP<br>pod lib lint CoreHTTP.podspec<br>验证通过会显示如下图所示的成功提示<br>1</p>
+<p>使用 Xcode 打开工程，删除对应以 Test开头 的相关的库和文件夹，确保 Xcode 能编译通过，选择模拟器即可。</p>
+<p>这里一定要先清空 cocoapods 的缓存，否则后面远程验证还是报错，无法通过验证。</p>
+<p>清空 cocoapods 的缓存，命令如下：</p>
+<p>1<br>2<br>3<br>rm ~/Library/Caches/CocoaPods/Pods/External/CoreHTTP<br>rm ~/Library/Caches/CocoaPods/Pods/Specs/External/CoreHTTP</p>
+<ol start="5">
+<li>上传工程到 Github 远程代码仓库</li>
+</ol>
+<p>1<br>2<br>3<br>4<br>5<br>6<br>7<br>cd ~/workspace/iOS_private_lib<br>git add CoreHTTP/<br>git commit -m “Add lib.”<br>git push</p>
+<ol start="6">
+<li>给版本添加 tag</li>
+</ol>
+<p>1<br>2<br>3<br>4<br>5<br>cd ~/workspace/iOS_private_lib<br>git tag 0.1.0 -m “Add lib and example project.”<br>git push –tags</p>
+<ol start="7">
+<li>进行远程验证</li>
+</ol>
+<p>1<br>2<br>3<br>cd ~/workspace/iOS_private_lib<br>pod spec lint CoreHTTP/CoreHTTP.podspec –verbose –use-libraries –allow-warnings<br>注意：–verbose 选项是为了看编译和验证信息，–use-libraries 是为了能支持 i386 架构，如果不加此参数，私有库无法通过验证，–allow-warnings 参数是允许有警告。</p>
+<p>验证成功的示意图：<br>1</p>
+<p>提交私有 podspec</p>
+<ol>
+<li>向本地的 cocoapods 仓库添加私有 Spec Repo</li>
+</ol>
+<p>1<br>2<br>3<br>cd ~/workspace/iOS_private_lib<br>pod repo add PrivateSpec <a href="https://github.com/veryitman/private_spec_repo.git" target="_blank" rel="noopener">https://github.com/veryitman/private_spec_repo.git</a><br>这里一定要注意：对应的地址是 SpecRepo 仓库地址而不是代码仓库地址。</p>
+<p>本地存放 spec 的私有仓库名称，我这里取名为 PrivateSpec，你也可以取其他名字，但是记住在下面的步骤中要保持一致。</p>
+<p>1<br>ls -alt ~/.cocoapods/repos/<br>可以看到已经成功添加本地 repo 中，其他 master 是 cocoapods 官方公开的源，其他为私有源。如下图所示：<br>1</p>
+<ol start="2">
+<li>向私有的 Spec Repo 中提交 podspec</li>
+</ol>
+<p>下面的 PrivateSpec 是与上面的名称对应的。</p>
+<p>1<br>2<br>3<br>cd ~/workspace/iOS_private_lib<br>pod repo push PrivateSpec ./CoreHTTP/CoreHTTP.podspec –verbose –use-libraries –allow-warnings<br>这里要注意，添加私有库和之前博文 Cocoapods 管理开源项目 中提到的 pod trunk push 是不一样的操作。</p>
+<p>使用私有库</p>
+<ol>
+<li>搜索库</li>
+</ol>
+<p>1<br>pod search CoreHTTP<br>如果搜索不到，可以执行下面的两条命令:</p>
+<p>1<br>2<br>3<br>rm ~/Library/Caches/CocoaPods/search_index.json<br>pod setup<br>然后继续搜索就可以了，搜索成功会显示如下内容：</p>
+<p>1<br>2<br>3<br>4<br>5<br>6<br>CoreHTTP (0.1.0)<br>   CoreHTTP for create private pod, it is a demo only.<br>   pod ‘CoreHTTP’, ‘~&gt; 0.1.0’</p>
+<ul>
+<li>Homepage: <a href="https://github.com/veryitman/iOS_private_lib.git" target="_blank" rel="noopener">https://github.com/veryitman/iOS_private_lib.git</a></li>
+<li>Source:   <a href="https://github.com/veryitman/iOS_private_lib.git" target="_blank" rel="noopener">https://github.com/veryitman/iOS_private_lib.git</a></li>
+<li>Versions: 0.1.0 [PrivateSpec repo]<br>为了避免和其他私有库命名冲突，建议在自己的私有库前面加上公司或者其他标示，如 TepdCoreHTTP、FphCoreHTTP 等。</li>
+</ul>
+<ol start="2">
+<li>在 Podfile 文件的顶部添加 source</li>
+</ol>
+<p>1<br>2<br>source ‘<a href="https://github.com/veryitman/private_spec_repo.git&#39;" target="_blank" rel="noopener">https://github.com/veryitman/private_spec_repo.git&#39;</a><br>source ‘<a href="https://github.com/CocoaPods/Specs.git&#39;" target="_blank" rel="noopener">https://github.com/CocoaPods/Specs.git&#39;</a><br>注意一个是我们私有 SpecRepo 地址（非私有代码库地址），另一个是官方公有源地址。</p>
+<p>使用私有库的工程的 Podfile 写法示例如下：</p>
+<p>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>source ‘<a href="https://github.com/veryitman/private_spec_repo.git&#39;" target="_blank" rel="noopener">https://github.com/veryitman/private_spec_repo.git&#39;</a><br>source ‘<a href="https://github.com/CocoaPods/Specs.git&#39;" target="_blank" rel="noopener">https://github.com/CocoaPods/Specs.git&#39;</a><br>platform :ios, ‘7.0’<br>target ‘TestCoreHTTP’ do<br>    pod ‘CoreHTTP’, ‘~&gt; 0.1.0’<br>end<br>在工程中可以直接使用私有库了，示例代码如下：</p>
+<p>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11<br>12<br>13<br>14<br>15<br>16<br>17</p>
+<p>#import “ViewController.h”</p>
+<p>#import &lt;CoreHTTPHeader.h&gt;<br>@interface ViewController ()<br>@end<br>@implementation ViewController</p>
+<ul>
+<li><p>(void)viewDidLoad {</p>
+<p>  [super viewDidLoad];<br>  NSString <em>lib_desc = [CoreHTTPHeader libDesc];<br>  NSLog(@”The HTTP’s library desc: %@”, lib_desc);<br>}<br>@end<br>pod 命令<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>//将工程添加到本地 repo 中<br>pod repo add [本地私有仓库名] [远程仓库地址]<br>//移除本地 repo<br>pod repo remove [本地私有仓库名]<br>//查看本地 repo<br>pod repo<br>1<br>2<br>3<br>4<br>5<br>//只从本地验证你的pod能否通过验证<br>pod lib lint </em>.podspec<br>//从本地和远程验证你的pod能否通过验证<br>pod spec lint *.podspec<br>参考文档</p>
+</li>
+</ul>
 <h2 id="使用-CocoaPods-管理代码的必要性"><a href="#使用-CocoaPods-管理代码的必要性" class="headerlink" title="使用 CocoaPods 管理代码的必要性"></a>使用 CocoaPods 管理代码的必要性</h2><p>项目到了一定规模, 代码组织和结构显得尤为重要。</p>
 <p>重构项目结构，可以从分离代码开始。代码分离，可以按功能划分，把常用、稳定且和业务无关的代码封装成组件，抽离出来。</p>
 <p>分离代码, 常用的有几种方式：</p>
