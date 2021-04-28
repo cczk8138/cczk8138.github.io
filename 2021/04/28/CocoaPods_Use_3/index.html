@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_3.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_4.jpg">
 <meta property="og:image" content="https://cfap.github.io/media/cocoapods_use_5.jpg">
-<meta property="og:updated_time" content="2021-04-28T06:19:49.294Z">
+<meta property="og:updated_time" content="2021-04-28T06:44:52.945Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CocoaPods 使用：创建私有 pod 库">
 <meta name="twitter:description" content="使用场景有些项目或公司内，不希望把一些核心的公用代码开源，但是这些代码基本很稳定很成熟，可以做成组件给到其他人或者组内使用。就可以使用 Cocoapods 来创建自己的私有仓库，让大家共享代码，也是组件化的一种方案。 由于现实原因，国内访问 Github 和 CocoaPods 网站比较蛋疼，这里就用国内的 gitee 来做自私有库，效果和放在 Github 上一样，速度还快。如果放在 Gith">
@@ -113,69 +113,13 @@
 <p><img src="/media/cocoapods_use_16.jpg" alt="cocoapods_use_16"></p>
 <p><br><br>填写以上信息后 Xcode 会自动打开测试工程，在测试模板工程文件夹下，我们可以看到如下：<br><img src="/media/cocoapods_use_17.jpg" alt="cocoapods_use_17"></p>
 <p><br><br>修改 ABCDKit.podspec 文件<br><img src="/media/cocoapods_use_17.jpg" alt="cocoapods_use_19"></p>
-<p>验证 ABCDKit.podspec 文件有效性<br><img src="/media/cocoapods_use_17.jpg" alt="cocoapods_use_20"></p>
-<p>pod lib lint （验证上一步编辑的 ABCDKit.podspec 文件）<br>       $ cd /Users/XXX/Documents/OC-PrivatePods/WTYLogDebugKit</p>
-<pre><code>  $ git status
-
-  $ git add .
-
-  $ git commit -m&apos;init&apos;
-
-   编辑WTYLogDebugKit 模版工程的WTYLogDebugKit.podspec文件
-
-
-
-  $ pod lib lint （验证上一步编辑的 WTYLogDebugKit.podspec文件）
-
-  如果有ERROR，则需要去一个个修改完成，例如某个文件没有正确的引入依赖库等都会造成ERROR，解决好所  
-
-  有的ERROR后，验证结果如下：
-
- ![cocoapods_use_17](/media/cocoapods_use_17.jpg) 
-
-  这是一个警告，目前也并没有找到合适的解决办法，我们添加 --allow-warnings进行忽略
-
- $ pod lib lint --allow-warnings
-
- WTYLogDebugKit passed validation.
-
- 表明验证通过
-
- $ git status
-
- $ git add .
-
- $ git commit -m &apos;编辑spec文件&apos;
-
- $ git remote add origin https://gitee.com/wty2009/WTYLogDebugKit.git (将本地库与远程代码仓库进行关联)
-
- $ git push origin master  (提交到远程仓库)
-
-  如里有报错误：
-
-
-
- 可以输入：git push -f  或 git pull origin master --allow-unrelated-histories  //把远程仓库和本地同步，消除差异
-
-$ git tag &apos;0.1.0&apos; (要与WTYLogDebugKit.podspec文件中的tag值保持一致)
-
-$ git push --tags(将tag提交到远程)
-
-$ pod spec lint --allow-warnings（验证远程是否正确，注意：Username与Password一定要填写正确）
-
- WTYLogDebugKit.podspec passed validation.    
-
- 表明验证通过
-</code></pre><ol start="7">
-<li><p>将podspec文件提交到本地的私有索引库</p>
-<p>   $ pod repo</p>
-</li>
-</ol>
-<pre><code>$ pod repo push WTYProjectSpec WTYLogDebugKit.podspec
-
-注意：提交后，依然会验证 podspec文件，验证通过后 会自动上传到在远程spec索引库,不信的话你可以看看在第二步创建的
-
-Spec远程私有索引库，是不是多了一个 WTYLogDebugKit/0.1.0文件！
+<p><br><br>验证 ABCDKit.podspec 文件有效性<br><img src="/media/cocoapods_use_17.jpg" alt="cocoapods_use_20"></p>
+<p><br><br>git 提交改变，并和远程库相关联<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git status</span><br><span class="line">git add .</span><br><span class="line">git commit -m </span><br><span class="line">git remote add origin https://gitee.com/extrass/ABCDKit.git</span><br><span class="line">git push --set-upstream origin master</span><br></pre></td></tr></table></figure></p>
+<p><br><br>创建版本号 tag</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git tag &apos;0.1.0&apos; (要与 ABCDKit.podspec 文件中的 version 值保持一致)</span><br><span class="line">git push --tags (将 tag 提交到远程)</span><br><span class="line">pod spec lint --allow-warnings（验证有效性，注意 Username 与 Password 要填写正确）</span><br></pre></td></tr></table></figure>
+<p><br></p>
+<h3 id="将-podspec-文件提交到本地的私有索引库"><a href="#将-podspec-文件提交到本地的私有索引库" class="headerlink" title="将 podspec 文件提交到本地的私有索引库"></a>将 podspec 文件提交到本地的私有索引库</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pod repo</span><br><span class="line">pod repo push SWSpec ABCDKit.podspec</span><br></pre></td></tr></table></figure>
+<pre><code>注意：提交后，依然会验证 podspec文件，验证通过后 会自动上传到在远程 spec 索引库，可以看看在第二步创建的 SWSpecs 远程私有索引库，是不是多了一个 WTYLogDebugKit/0.1.0 文件！
 </code></pre><ol start="8">
 <li><p>添加及修改基础组件内容</p>
 <pre><code>$ cd /Users/XXX/Documents/OC-PrivatePods/WTYLogDebugKit
